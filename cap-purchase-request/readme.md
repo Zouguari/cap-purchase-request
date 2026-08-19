@@ -1,10 +1,12 @@
-# CAP Purchase Request Service (+ AI Copilot & SAP Fiori UI)
+# CAP Purchase Request Service — Workflow SAP Fiori + Copilot IA
 
-> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation Fiori, une vue analytique interactive (Chart.js), une simulation de rôles par instance (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+Application Node.js basée sur le SAP Cloud Application Programming Model (CAP), conçue pour étendre un backend SAP RAP (RESTful ABAP Programming Model) existant avec un workflow d'approbation Fiori, une autorisation par instance (Employé/Manager), une vue analytique interactive et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+
+Ce projet complète un backend RAP développé indépendamment ([voir le dépôt](https://github.com/Zouguari/Sap_purchase_request)), en démontrant comment SAP CAP peut être utilisé comme couche d'orchestration et d'intégration IA au-dessus d'un système SAP existant, sans dupliquer ni contourner sa logique métier.
 
 ---
 
-## 🏗️ Architecture du Projet
+## 🏗️ Architecture
 
 ```
 ┌───────────────────────────┐      ┌─────────────────────────────┐
@@ -19,93 +21,99 @@
 └───────────────────────────┘      └─────────────────────────────┘
 ```
 
-> **Note d'Architecture :** Le service CAP simule actuellement le service SAP RAP réel (`ZUI_PURCHASEREQUEST`) avec la même structure d'entités et les mêmes actions (`submit`, `approve`, `reject`). Il pourra être connecté directement au service RAP distant via SAP Cloud SDK sans modifier l'interface utilisateur.
+> **Note d'architecture : pourquoi une simulation, et pas une connexion directe au RAP**  
+> Le service CAP a été conçu pour se brancher directement sur le vrai service OData V4 exposé par le backend RAP (`ZUI_PURCHASEREQUEST`) — le modèle CDS a d'ailleurs été généré à partir du `$metadata` réel de ce service (`cds import`), et une première tentative d'intégration a été menée avec succès jusqu'à l'authentification.  
+> Cette connexion nécessite cependant un accès SAP BTP Cockpit pour créer les identifiants OAuth machine-à-machine (*Communication Arrangement / Service Key*) — un accès non disponible dans le cadre d'un compte BTP Free Tier depuis mon pays de résidence.  
+> Plutôt que d'attendre cet accès, j'ai choisi de simuler fidèlement le service RAP dans CAP (mêmes entités, mêmes champs, mêmes actions `submit`/`approve`/`reject`, mêmes règles de transition de statut) afin de :
+> - comprendre en profondeur le fonctionnement de CAP (modèle CDS, services OData V4, actions liées, handlers Node.js) ;
+> - construire et démontrer l'intégralité de la couche d'orchestration et d'IA sans dépendance externe ;
+> - garder une architecture prête à être reconnectée au vrai RAP en ne changeant que la configuration de connexion, sans réécrire le service.
 
 ---
 
-## 📸 Aperçu & Captures d'Écran (Interface SAP Fiori)
+## 📸 Aperçu
 
-### 1. Vue Manager — Liste Globale des Demandes d'Achat
-Vue globale des demandes d'achat pour le rôle **Manager** avec cartes KPI, ShellBar SAP Fiori et filtres d'affichage.
-![Vue Manager - Liste Globale](screenshots/01-list-purchase-requests.png)
+### 1. Vue Manager — Liste globale des demandes d'achat
+Vue globale des demandes d'achat pour le rôle Manager, avec cartes KPI, ShellBar SAP Fiori et filtres d'affichage.
+![Vue Manager - Liste globale](screenshots/01-list-purchase-requests.png)
 
-### 2. Vue Employé — Consultation d'une Demande (`mlefevre`)
-Vue restreinte pour un **Employé** (`mlefevre`) ne visualisant que sa propre demande. Les boutons d'approbation/rejet sont masqués.
+### 2. Vue Employé — Consultation d'une demande
+Vue restreinte pour un Employé, ne visualisant que sa propre demande. Les boutons d'approbation/rejet sont masqués.
 ![Vue Employé - Consultation](screenshots/02-detail-with-items.png)
 
-### 3. Vue Employé — Action de Soumission (`zouguari`)
-Soumission d'une demande d'achat `NEW` par son demandeur (`zouguari`), déclenchant la mise à jour à l'état `SUBMITTED` avec notification toast.
-![Vue Employé - Action Soumettre](screenshots/03-submit-action.png)
+### 3. Vue Employé — Soumission d'une demande
+Soumission d'une demande NEW par son demandeur, déclenchant la transition vers SUBMITTED avec notification.
+![Vue Employé - Soumission](screenshots/03-submit-action.png)
 
-### 4. Vue Manager — Action d'Approbation & Rejet
-Validation d'une demande soumise par le **Manager** avec notification de confirmation `Action 'approve' exécutée avec succès !`.
-![Vue Manager - Action Approuver/Rejeter](screenshots/04-approve-reject-workflow.png)
+### 4. Vue Manager — Approbation / Rejet
+Validation d'une demande soumise par le Manager, avec confirmation de l'action.
+![Vue Manager - Approbation / Rejet](screenshots/04-approve-reject-workflow.png)
 
-### 5. Analyse Intelligente par IA — Rapport SAP Fiori (Groq Llama 3.3 70B)
-Rapport d'analyse généré à la volée par l'IA Groq intégré dans le panneau SAP Fiori avec suggestion de catégorie, résumé et recommandation.
-![Rapport d'Analyse IA Fiori](screenshots/05-ai-analysis-fiori.png)
+### 5. Analyse intelligente par IA
+Rapport d'analyse généré à la volée (Groq / Llama 3.3 70B), intégré dans le panneau Fiori : suggestion de catégorie, niveau de risque, détection d'anomalie et recommandation.
+![Analyse intelligente par IA](screenshots/05-ai-analysis-fiori.png)
 
-### 6. Vue Analytique Interactive (Graphiques Chart.js)
-Nouvel onglet Analytics présentant 3 graphiques interactifs (Donut par statut, Barres par catégorie, et Top 5 par montant) calculés en temps réel à partir des données filtrées par rôle.
-![Vue Analytics Chart.js](screenshots/06-analytics-view.png)
-
----
-
-## 🤖 Analyse IA (Groq / Llama 3.3 70B)
-
-### Principe de fonctionnement
-Le service intègre une action OData V4 liée `analyzeWithAI()` exécutée à la demande. Elle extrait la demande d'achat et la totalité de ses articles associés, puis sollicite l'API **Groq** via le modèle `llama-3.3-70b-versatile`. 
-*Cette analyse est effectuée en lecture seule, sans altération ni écriture en base de données.*
-
-### Données analysées & retournées
-L'IA génère un rapport structuré en JSON contenant :
-- **Catégorie suggérée :** Reclassification intelligente selon la nature des produits.
-- **Niveau de risque :** Évaluation globale (`Low`, `Medium`, `High`).
-- **Résumé synthétique :** Explication synthétique en 2 phrases maximum.
-- **Détection d'anomalie :** Booléen (`anomaly_detected`) accompagné de sa justification (`anomaly_reason`).
-- **Recommandation décisionnelle :** Conseil clair pour l'approbateur.
+### 6. Vue analytique interactive
+Onglet Analytics présentant 3 graphiques (répartition par statut, montants par catégorie, top 5 des demandes), calculés en temps réel selon le rôle actif.
+![Vue analytique interactive](screenshots/06-analytics-view.png)
 
 ---
 
-## 📊 Vue Analytique (Chart.js)
+## ⚙️ Fonctionnalités
 
-L'onglet **Analytics & Graphiques** inclut 3 visualisations interactives calculées dynamiquement côté client :
-1. **🍩 Répartition par Statut (Donut Chart) :** Répartition des demandes par état (`NEW`, `SUBMITTED`, `APPROVED`, `REJECTED`) aux couleurs Fiori Horizon.
-2. **📊 Montant Total par Catégorie (Bar Chart) :** Aggregation des montants cumulés par secteur de dépense (`IT`, `OFFICE`, etc.).
-3. **🏆 Top 5 des Demandes par Montant (Horizontal Bar Chart) :** Classement des 5 plus importantes demandes d'achat par montant total.
+### Workflow métier
+- Modèle header/items avec composition (`PurchaseRequests` → `PurchaseRequestItems`)
+- Calcul automatique de `ItemAmount` et `TotalAmount`
+- Machine à états : `NEW` → `SUBMITTED` → `APPROVED` ou `REJECTED` (motif obligatoire), avec rejet explicite de toute transition invalide
+
+### Autorisation par instance (Employé/Manager)
+- Un employé ne voit et ne peut soumettre que ses propres demandes, uniquement en statut `NEW`
+- Seul un manager peut approuver ou rejeter
+- Règles appliquées côté serveur (pas seulement masquées dans l'interface), reproduisant la logique `get_instance_authorizations` du backend RAP d'origine
+
+### Analyse IA (Groq / Llama 3.3 70B)
+- Action OData V4 liée `analyzeWithAI()`, exécutée à la demande, en lecture seule (aucune écriture en base)
+- Retourne : catégorie suggérée, niveau de risque, résumé, détection d'anomalie avec justification, recommandation
+- Validé sur cas réels : détection confirmée d'une anomalie de prix (ex. un article à 50 000 € correctement signalé comme suspect), et classification correcte d'une demande normale
+
+### Vue analytique
+- Répartition par statut, montants par catégorie, top 5 des demandes — recalculés dynamiquement selon le rôle et les données à jour
 
 ---
 
-## 🛠️ Stack Technique
+## 🛠️ Stack technique
 
-- **Framework Backend :** SAP CAP (Cloud Application Programming Model) / Node.js
-- **Design System UI :** SAP Fiori Horizon Theme (`--sapBrandColor`, `--sapBackgroundColor`, police Fiori 72)
-- **Composants UI :** `@ui5/webcomponents` v2 (`ui5-shellbar`, `ui5-panel`, `ui5-object-status`, `ui5-badge`, `ui5-button`)
-- **Librairie Graphique :** Chart.js v4 (Donut, Bar, Horizontal Bar)
-- **Moteur IA :** Groq API (Modèle LLM `llama-3.3-70b-versatile` / `groq/compound`)
-- **Protocole de Service :** OData V4 (avec Actions personnalisées `submit`, `approve`, `reject`, `analyzeWithAI`)
-- **Base de Données :** SQLite (In-Memory avec initialisation CSV automatique)
+| Composant | Technologie |
+| :--- | :--- |
+| **Backend** | SAP CAP (Cloud Application Programming Model) / Node.js |
+| **Protocole de service** | OData V4, actions personnalisées (`submit`, `approve`, `reject`, `analyzeWithAI`) |
+| **Base de données** | SQLite (in-memory, seed automatique via CSV) |
+| **Design system UI** | SAP Fiori Horizon Theme, `@ui5/webcomponents` v2 |
+| **Graphiques** | Chart.js v4 |
+| **IA** | Groq API — `llama-3.3-70b-versatile` |
 
 ---
 
-## 🚀 Comment Lancer le Projet
+## 🚀 Lancer le projet
 
-### 1. Installation des dépendances
 ```bash
+# 1. Installer les dépendances
 npm install
-```
 
-### 2. Configuration des variables d'environnement
-Vérifiez ou créez le fichier `.env` à la racine :
-```env
-GROQ_API_KEY=votre_cle_groq_api
-```
+# 2. Configurer la clé API (créer un fichier .env à la racine)
+echo "GROQ_API_KEY=votre_cle_groq" > .env
 
-### 3. Démarrer le serveur CAP
-```bash
+# 3. Démarrer le serveur CAP
 npx cds watch
 ```
 
-### 4. Accéder à l'application
-- **Dashboard UI Fiori :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
+- **Dashboard :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
 - **Endpoint OData V4 :** [http://localhost:4004/odata/v4/purchase-request](http://localhost:4004/odata/v4/purchase-request)
+
+---
+
+## 🔭 Limites connues & prochaines étapes
+
+- Le niveau de risque IA n'est pas encore parfaitement calibré (une demande normale peut occasionnellement être classée Medium plutôt que Low) — piste d'amélioration : affiner le prompt système avec des seuils explicites.
+- Connexion au backend RAP réel : dès obtention d'un accès BTP Cockpit (*Communication Arrangement / Service Key OAuth*), il suffira de mettre à jour la configuration `cds.requires.ZUI_PURCHASEREQUEST` — le modèle CDS a déjà été généré à partir du `$metadata` réel du service et est prêt à l'emploi.
+- Tests automatisés à ajouter sur le workflow de transitions de statut.
