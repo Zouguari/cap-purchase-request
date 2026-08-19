@@ -1,5 +1,14 @@
 using my.purchase as db from '../db/schema';
 
+type AIAnalysisResult {
+    category_suggestion : String;
+    risk_level          : String;
+    summary             : String;
+    anomaly_detected    : Boolean;
+    anomaly_reason      : String;
+    recommendation      : String;
+}
+
 // Simule le service ZUI_PURCHASEREQUEST du RAP.
 // Memes entites, memes actions (submit/approve/reject), memes transitions
 // de statut. Peut etre remplace plus tard par le vrai service distant
@@ -10,6 +19,7 @@ service PurchaseRequestService {
         action submit() returns PurchaseRequests;
         action approve() returns PurchaseRequests;
         action reject(reason: String(255)) returns PurchaseRequests;
+        action analyzeWithAI() returns AIAnalysisResult;
     };
 
     entity PurchaseRequestItems as projection on db.PurchaseRequestItems;

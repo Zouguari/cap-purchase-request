@@ -11,7 +11,8 @@
     "@sap-cloud-sdk/connectivity": "^4.8.0",
     "@sap-cloud-sdk/http-client": "^4.8.0",
     "@sap-cloud-sdk/resilience": "^4.8.0",
-    "@sap/cds": "^10"
+    "@sap/cds": "^10",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^3",
