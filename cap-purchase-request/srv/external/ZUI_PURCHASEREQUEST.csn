@@ -1,0 +1,1222 @@
+{
+ "meta": {
+  "creator": "cds-dk 10.0.7"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "ZUI_PURCHASEREQUEST.PurchaseRequestCbAControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "_Item": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    }
+   }
+  },
+  "ZUI_PURCHASEREQUEST.PurchaseRequestOperationControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "approve": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "Edit": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "reject": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "submit": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    }
+   }
+  },
+  "ZUI_PURCHASEREQUEST.EntityControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "Deletable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "Updatable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    }
+   }
+  },
+  "ZUI_PURCHASEREQUEST.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.String",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.String",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.String"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.String",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.String"
+    }
+   }
+  },
+  "ZUI_PURCHASEREQUEST": {
+   "kind": "service",
+   "@cds.external": true,
+   "@CodeList.CurrencyCodes.Url": "../../../../default/iwbep/common/0001/$metadata",
+   "@CodeList.CurrencyCodes.CollectionPath": "Currencies",
+   "@CodeList.UnitsOfMeasure.Url": "../../../../default/iwbep/common/0001/$metadata",
+   "@CodeList.UnitsOfMeasure.CollectionPath": "UnitsOfMeasure",
+   "@Common.ApplyMultiUnitBehaviorForSortingAndFiltering": true,
+   "@Capabilities.FilterFunctions": [
+    "eq",
+    "ne",
+    "gt",
+    "ge",
+    "lt",
+    "le",
+    "and",
+    "or",
+    "contains",
+    "startswith",
+    "endswith",
+    "any",
+    "all"
+   ],
+   "@SAP__support.TechnicalInfoLinks.Url": "../../../../default/iwbep/common/0001/$metadata",
+   "@SAP__support.TechnicalInfoLinks.FunctionImport": "GetTechnicalInfoLinks",
+   "@Capabilities.SupportedFormats": [
+    "application/json",
+    "application/pdf"
+   ],
+   "@PDF.Features.DocumentDescriptionReference": "../../../../default/iwbep/common/0001/$metadata",
+   "@PDF.Features.DocumentDescriptionCollection": "MyDocumentDescriptions",
+   "@PDF.Features.ArchiveFormat": true,
+   "@PDF.Features.Border": true,
+   "@PDF.Features.CoverPage": true,
+   "@PDF.Features.FitToPage": true,
+   "@PDF.Features.FontName": true,
+   "@PDF.Features.FontSize": true,
+   "@PDF.Features.HeaderFooter": true,
+   "@PDF.Features.IANATimezoneFormat": true,
+   "@PDF.Features.Margin": true,
+   "@PDF.Features.Padding": true,
+   "@PDF.Features.ResultSizeDefault": 20000,
+   "@PDF.Features.ResultSizeMaximum": 20000,
+   "@PDF.Features.Signature": true,
+   "@PDF.Features.TextDirectionLayout": true,
+   "@PDF.Features.Treeview": true,
+   "@PDF.Features.UploadToFileShare": true,
+   "@Capabilities.BatchSupport.SupportedFormats": [
+    "application/json",
+    "multipart/mixed"
+   ],
+   "@Capabilities.KeyAsSegmentSupported": true,
+   "@Capabilities.AsynchronousRequestsSupported": true
+  },
+  "ZUI_PURCHASEREQUEST.I_DraftAdministrativeData": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "DraftUUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft (Technical ID)"
+    },
+    "DraftEntityType": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Entity ID"
+    },
+    "CreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Draft Created On"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "CreatedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zui_purchaserequest-0001';va='com.sap.gateway.srvd.zui_purchaserequest.v0001.et-i_draftadministrativedata.createdbyuser'/$metadata"
+     ],
+     "@Common.Label": "Draft Created By"
+    },
+    "LastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "LastChangedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zui_purchaserequest-0001';va='com.sap.gateway.srvd.zui_purchaserequest.v0001.et-i_draftadministrativedata.lastchangedbyuser'/$metadata"
+     ],
+     "@Common.Label": "Draft Last Changed By"
+    },
+    "DraftAccessType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Access Type"
+    },
+    "ProcessingStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process Since"
+    },
+    "InProcessByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "InProcessByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By"
+    },
+    "DraftIsKeptByUser": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Is Kept By User"
+    },
+    "EnqueueStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Locked Since"
+    },
+    "DraftIsCreatedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created By Me"
+    },
+    "DraftIsLastChangedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed By Me"
+    },
+    "DraftIsProcessedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By Me"
+    },
+    "CreatedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created By (Description)"
+    },
+    "LastChangedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed By (Description)"
+    },
+    "InProcessByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By (Description)"
+    }
+   },
+   "@Common.Label": "Draft Administration Data",
+   "@Capabilities.SearchRestrictions.Searchable": true,
+   "@Capabilities.SearchRestrictions.UnsupportedExpressions": {
+    "#": "group "
+   },
+   "@Capabilities.SearchRestrictions.SearchSyntax": "https://url.sap/odata-search",
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "CreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "LastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.ReadRestrictions.Readable": false,
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false,
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "ZUI_PURCHASEREQUEST.PurchaseRequest": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "PrId": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "PrNumber": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "PR Number",
+     "@Common.IsDigitSequence": true
+    },
+    "Requester": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Label": "Requester"
+    },
+    "Description": {
+     "type": "cds.String",
+     "length": 100,
+     "notNull": true,
+     "@Common.Label": "Description",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     }
+    },
+    "Category": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Category",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     }
+    },
+    "Priority": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.Label": "Priority",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     }
+    },
+    "Status": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Status",
+     "@Core.Computed": true
+    },
+    "RequestedDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Requested Date",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     }
+    },
+    "TotalAmount": {
+     "type": "cds.Decimal",
+     "precision": 15,
+     "notNull": true,
+     "@Common.Label": "Total Amount",
+     "@Core.Computed": true,
+     "@Measures.ISOCurrency": {
+      "=": "Currency"
+     }
+    },
+    "Currency": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsCurrency": true
+    },
+    "RejectReason": {
+     "type": "cds.String",
+     "length": 255,
+     "notNull": true,
+     "@Common.Label": "Reject Reason"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "User Name",
+     "@Common.Heading": "User",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=SYUNAME"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@Common.Label": "Time Stamp",
+     "@Common.QuickInfo": "UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=TIMESTAMPL"
+    },
+    "LastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "User Name",
+     "@Common.Heading": "User",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=SYUNAME"
+    },
+    "LastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@Common.Label": "Time Stamp",
+     "@Common.QuickInfo": "UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=TIMESTAMPL"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@Common.Label": "Time Stamp",
+     "@Common.QuickInfo": "UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=TIMESTAMPL"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has Draft",
+     "@Common.QuickInfo": "Draft - Indicator - Has draft document"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created On"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has active",
+     "@Common.QuickInfo": "Draft - Indicator - Has active document"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Is active",
+     "@Common.QuickInfo": "Draft - Indicator - Is active document"
+    },
+    "__CreateByAssociationControl": {
+     "type": "ZUI_PURCHASEREQUEST.PurchaseRequestCbAControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true
+    },
+    "__EntityControl": {
+     "type": "ZUI_PURCHASEREQUEST.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true
+    },
+    "__OperationControl": {
+     "type": "ZUI_PURCHASEREQUEST.PurchaseRequestOperationControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "ZUI_PURCHASEREQUEST.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "ZUI_PURCHASEREQUEST.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_Item": {
+     "type": "cds.Composition",
+     "target": "ZUI_PURCHASEREQUEST.PurchaseRequestItem",
+     "cardinality": {
+      "max": "*"
+     },
+     "on": [
+      {
+       "ref": [
+        "_Item",
+        "_PurchaseRequest"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "$self"
+       ]
+      }
+     ],
+     "@Common.Composition": true
+    }
+   },
+   "actions": {
+    "approve": {
+     "kind": "action",
+     "params": {},
+     "returns": {
+      "type": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/approve"
+     }
+    },
+    "Resume": {
+     "kind": "action",
+     "params": {}
+    },
+    "Prepare": {
+     "kind": "action",
+     "params": {}
+    },
+    "Edit": {
+     "kind": "action",
+     "params": {
+      "PreserveChanges": {
+       "type": "cds.Boolean",
+       "notNull": true,
+       "@Common.IsUpperCase": true,
+       "@Common.Label": "TRUE",
+       "@Common.QuickInfo": "Data element for domain BOOLE: TRUE (='X') and FALSE (=' ')"
+      }
+     },
+     "returns": {
+      "type": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/Edit"
+     }
+    },
+    "Discard": {
+     "kind": "action",
+     "params": {}
+    },
+    "Activate": {
+     "kind": "action",
+     "params": {},
+     "returns": {
+      "type": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+      "notNull": true
+     }
+    },
+    "reject": {
+     "kind": "action",
+     "params": {
+      "REJECT_REASON": {
+       "type": "cds.String",
+       "length": 255,
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/reject"
+     }
+    },
+    "submit": {
+     "kind": "action",
+     "params": {},
+     "returns": {
+      "type": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/submit"
+     }
+    }
+   },
+   "@Common.Label": "Purchase Request Projection",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "General Information",
+     "ID": "GeneralInfo",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    },
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Items",
+     "ID": "Items",
+     "Target": {
+      "=": "_Item.@UI.LineItem"
+     }
+    }
+   ],
+   "@UI.HeaderInfo.TypeName": "Purchase Request",
+   "@UI.HeaderInfo.TypeNamePlural": "Purchase Requests",
+   "@UI.HeaderInfo.Title.$Type": "SAP__UI.DataField",
+   "@UI.HeaderInfo.Title.Value": {
+    "=": "PrNumber"
+   },
+   "@UI.HeaderInfo.Description.$Type": "SAP__UI.DataField",
+   "@UI.HeaderInfo.Description.Value": {
+    "=": "Description"
+   },
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "PrNumber"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Requester"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Description"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Category"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Priority"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "RequestedDate"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "TotalAmount"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "RejectReason"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Reject",
+     "Action": "ZUI_PURCHASEREQUEST.reject(ZUI_PURCHASEREQUEST.PurchaseRequestType)",
+     "InvocationGrouping": {
+      "#": "Isolated"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Approve",
+     "Action": "ZUI_PURCHASEREQUEST.approve(ZUI_PURCHASEREQUEST.PurchaseRequestType)",
+     "InvocationGrouping": {
+      "#": "Isolated"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Submit",
+     "Action": "ZUI_PURCHASEREQUEST.submit(ZUI_PURCHASEREQUEST.PurchaseRequestType)",
+     "InvocationGrouping": {
+      "#": "Isolated"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "PrNumber"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Requester"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Description"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Category"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Priority"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "RequestedDate"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "TotalAmount"
+     }
+    }
+   ],
+   "@UI.SelectionFields": [
+    "PrNumber",
+    "Requester",
+    "Category",
+    "Priority",
+    "Status"
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "SiblingEntity"
+     },
+     "InsertRestrictions": {
+      "Insertable": false
+     },
+     "DeepUpdateSupport": {
+      "Supported": false
+     }
+    },
+    {
+     "NavigationProperty": {
+      "=": "_Item"
+     },
+     "InsertRestrictions": {
+      "Insertable": {
+       "=": "__CreateByAssociationControl/_Item"
+      }
+     }
+    }
+   ],
+   "@Common.DraftRoot.ResumeAction": "ZUI_PURCHASEREQUEST.Resume",
+   "@Common.DraftRoot.PreparationAction": "ZUI_PURCHASEREQUEST.Prepare",
+   "@Common.DraftRoot.EditAction": "ZUI_PURCHASEREQUEST.Edit",
+   "@Common.DraftRoot.DiscardAction": "ZUI_PURCHASEREQUEST.Discard",
+   "@Common.DraftRoot.ActivationAction": "ZUI_PURCHASEREQUEST.Activate",
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.UpdateRestrictions.DeltaUpdateSupported": true,
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.NonUpdatableNavigationProperties": [
+    "DraftAdministrativeData",
+    "SiblingEntity",
+    "_Item"
+   ],
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true,
+   "@Capabilities.DeepUpdateSupport.ContentIDSupported": true,
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   }
+  },
+  "ZUI_PURCHASEREQUEST.PurchaseRequestItem": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ItemId": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "PrId": {
+     "type": "cds.UUID",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "ItemNumber": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.Label": "Item Number",
+     "@Common.IsDigitSequence": true
+    },
+    "Product": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Product",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     }
+    },
+    "Quantity": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "scale": 3,
+     "notNull": true,
+     "@Common.Label": "Quantity",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     },
+     "@Measures.Unit": {
+      "=": "Unit"
+     }
+    },
+    "Unit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.Label": "Unit"
+    },
+    "Price": {
+     "type": "cds.Decimal",
+     "precision": 15,
+     "notNull": true,
+     "@Common.Label": "Price",
+     "@Common.FieldControl": {
+      "#": "Mandatory"
+     },
+     "@Measures.ISOCurrency": {
+      "=": "Currency"
+     }
+    },
+    "Currency": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsCurrency": true,
+     "@Common.Label": "Currency"
+    },
+    "ItemAmount": {
+     "type": "cds.Decimal",
+     "precision": 15,
+     "notNull": true,
+     "@Common.Label": "Item Amount",
+     "@Core.Computed": true,
+     "@Measures.ISOCurrency": {
+      "=": "Currency"
+     }
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "User Name",
+     "@Common.Heading": "User",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=SYUNAME"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@Common.Label": "Time Stamp",
+     "@Common.QuickInfo": "UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=TIMESTAMPL"
+    },
+    "LastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "User Name",
+     "@Common.Heading": "User",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=SYUNAME"
+    },
+    "LastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@Common.Label": "Time Stamp",
+     "@Common.QuickInfo": "UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)",
+     "@Common.DocumentationRef": "urn:sap-com:documentation:key?=type=DE&id=TIMESTAMPL"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has Draft",
+     "@Common.QuickInfo": "Draft - Indicator - Has draft document"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created On"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has active",
+     "@Common.QuickInfo": "Draft - Indicator - Has active document"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Is active",
+     "@Common.QuickInfo": "Draft - Indicator - Is active document"
+    },
+    "__EntityControl": {
+     "type": "ZUI_PURCHASEREQUEST.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "ZUI_PURCHASEREQUEST.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "ZUI_PURCHASEREQUEST.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "ZUI_PURCHASEREQUEST.PurchaseRequestItem",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_PurchaseRequest": {
+     "type": "cds.Association",
+     "target": "ZUI_PURCHASEREQUEST.PurchaseRequest",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "_PurchaseRequest",
+        "PrId"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "PrId"
+       ]
+      }
+     ]
+    }
+   },
+   "@Common.Label": "Purchase Request Item Projection",
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "ItemNumber"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Product"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Quantity"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Unit"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Price"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Currency"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "ItemAmount"
+     }
+    }
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "SiblingEntity"
+     },
+     "DeepUpdateSupport": {
+      "Supported": false
+     }
+    },
+    {
+     "NavigationProperty": {
+      "=": "_PurchaseRequest"
+     },
+     "InsertRestrictions": {
+      "Insertable": false
+     },
+     "DeepUpdateSupport": {
+      "Supported": false
+     }
+    }
+   ],
+   "@Common.DraftNode": true,
+   "@Common.DraftActivationVia": [
+    "SAP__self.Container/PurchaseRequest"
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.UpdateRestrictions.DeltaUpdateSupported": true,
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.NonUpdatableNavigationProperties": [
+    "DraftAdministrativeData",
+    "SiblingEntity",
+    "_PurchaseRequest"
+   ],
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true,
+   "@Capabilities.DeepUpdateSupport.ContentIDSupported": true,
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   }
+  }
+ }
+}

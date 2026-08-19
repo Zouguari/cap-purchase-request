@@ -1,0 +1,37 @@
+{
+  "name": "cap-purchase-request",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Welcome to your new CAP project.",
+  "main": "index.js",
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "dependencies": {
+    "@sap-cloud-sdk/connectivity": "^4.8.0",
+    "@sap-cloud-sdk/http-client": "^4.8.0",
+    "@sap-cloud-sdk/resilience": "^4.8.0",
+    "@sap/cds": "^10"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^3",
+    "playwright": "^1.62.1"
+  },
+  "cds": {
+    "requires": {
+      "[production]": {
+        "db": {
+          "kind": "sql"
+        }
+      },
+      "ZUI_PURCHASEREQUEST": {
+        "kind": "odata",
+        "model": "srv/external/ZUI_PURCHASEREQUEST",
+        "credentials": {
+          "url": "https://ce6e06b6-f3bd-4a11-9b57-63a09d5219ea.abap-web.eu10.hana.ondemand.com/sap/opu/odata4/sap/zui_purchaserequest_o4/srvd/sap/zui_purchaserequest/0001/",
+          "authentication": "BasicAuthentication"
+        }
+      }
+    }
+  }
+}

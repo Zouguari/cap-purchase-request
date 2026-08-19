@@ -1,0 +1,11 @@
+using { ZUI_PURCHASEREQUEST as external } from './external/ZUI_PURCHASEREQUEST';
+
+service OrchestrationService {
+
+  @readonly
+  entity PurchaseRequests as projection on external.PurchaseRequest;
+
+  @readonly
+  entity PurchaseRequestItems as projection on external.PurchaseRequestItem;
+
+}

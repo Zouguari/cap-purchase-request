@@ -1,0 +1,15 @@
+const cds = require('@sap/cds');
+
+module.exports = cds.service.impl(async function () {
+
+    const rap = await cds.connect.to('ZUI_PURCHASEREQUEST');
+
+    this.on('READ', 'PurchaseRequests', async (req) => {
+        return rap.run(req.query);
+    });
+
+    this.on('READ', 'PurchaseRequestItems', async (req) => {
+        return rap.run(req.query);
+    });
+
+});
