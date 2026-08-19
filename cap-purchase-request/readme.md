@@ -1,6 +1,6 @@
 # CAP Purchase Request Service (+ AI Copilot)
 
-> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation moderne et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation moderne, une simulation de rôles (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
 
 ---
 
@@ -15,7 +15,7 @@
                                                   │
                                                   ▼
 ┌───────────────────────────┐      ┌─────────────────────────────┐
-│    Dashboard UI HTML/JS   │ ◄─── │       OData V4 Endpoint     │
+│  SAP Fiori UI5 Web Comp.  │ ◄─── │       OData V4 Endpoint     │
 └───────────────────────────┘      └─────────────────────────────┘
 ```
 
@@ -25,9 +25,9 @@
 
 ## 📸 Aperçu & Captures d'Écran
 
-### 1. Liste des Demandes d'Achat (Purchase Requests)
-Vue d'ensemble avec indicateurs de performance (KPI) et tableau des demandes associées à l'utilisateur `zouguari`.
-![Liste des Purchase Requests](screenshots/01-list-purchase-requests.png)
+### 1. Interface SAP Fiori (Horizon Theme & UI5 Web Components)
+Design inspiré des applications SAP Fiori officielles avec `<ui5-shellbar>`, palette de couleurs Horizon, et badges de statut `<ui5-object-status>`.
+![Interface SAP Fiori Redesign](screenshots/07-fiori-redesign.png)
 
 ### 2. Vue Détail avec Articles Inclus
 Détail d'une demande sélectionnée avec calcul automatique des sous-totaux par article et du montant global (3 600,00 EUR).
@@ -38,11 +38,11 @@ Soumission d'une demande d'achat à l'état `NEW`, faisant passer son statut à 
 ![Action Submit](screenshots/03-submit-action.png)
 
 ### 4. Workflow d'Approbation et Rejet
-Validation ou rejet d'une demande soumise avec mise à jour en temps réel des statuts.
+Validation ou rejet d'une demande soumise avec mise à jour en temps réel des statuts selon le rôle actif (Manager).
 ![Workflow Approve/Reject](screenshots/04-approve-reject-workflow.png)
 
-### 5. Gestion des Erreurs et Validations de Transitions
-Contrôle des règles de gestion avec affichage d'une notification d'erreur en cas d'action invalide.
+### 5. Gestion des Erreurs et Validations de Transitions (HTTP 403)
+Contrôle des règles de gestion et filtrage d'autorisation par instance côté serveur.
 ![Erreur Transition Invalide](screenshots/05-error-invalid-transition.png)
 
 ### 6. Analyse Intelligente par IA (Détection d'Anomalie)
@@ -85,24 +85,24 @@ Test réalisé sur un cas suspect (Demande d'achat d'un stylo bille à **50 000,
 ## 🛠️ Stack Technique
 
 - **Framework Backend :** SAP CAP (Cloud Application Programming Model) / Node.js
+- **Design System UI :** SAP Fiori Horizon Theme (`--sapBrandColor`, `--sapBackgroundColor`, police Fiori 72)
+- **Composants UI :** `@ui5/webcomponents` v2 (`ui5-shellbar`, `ui5-panel`, `ui5-object-status`, `ui5-badge`, `ui5-button`)
 - **Moteur IA :** Groq API (Modèle LLM `llama-3.3-70b-versatile` / `groq/compound`)
 - **Protocole de Service :** OData V4 (avec Actions personnalisées `submit`, `approve`, `reject`, `analyzeWithAI`)
 - **Base de Données :** SQLite (In-Memory avec initialisation CSV automatique)
-- **Interface Utilisateur :** HTML5, Vanilla CSS (Design Moderne & Responsive), JavaScript (Fetch API OData V4)
 
 ---
 
 ## ⚙️ Fonctionnalités Clés
 
+- **Interface SAP Fiori Horizon :** ShellBar avec sélecteur de rôle, cartes KPI, tableaux réactifs et badges de statut Fiori `ui5-object-status` (`Positive`, `Critical`, `Negative`, `Informative`).
+- **Simulation de Rôles & Autorisation par Instance :**
+  - Mode **Employé** : l'utilisateur ne voit que ses propres demandes et ne peut soumettre que ses demandes à l'état `NEW`.
+  - Mode **Manager** : accès global à toutes les demandes et droits d'approbation/rejet.
+  - Sécurité backend : rejet HTTP 403 en cas de tentative d'action non autorisée.
 - **Calcul Automatique des Montants :**
   - Recalcul dynamique de `ItemAmount` (`Quantity * Price`).
   - Agrégation automatique du `TotalAmount` global.
-- **Workflow de Validation à États :**
-  - Chaîne d'états stricte : `NEW` ➔ `SUBMITTED` ➔ `APPROVED` / `REJECTED`.
-- **Validations Métier & Sécurité :**
-  - Bloquage des transitions non autorisées.
-  - Saisie obligatoire d'un motif de rejet (`RejectReason`).
-  - Masquage et isolation totale des clés API via des variables d'environnement (`.env`).
 
 ---
 
@@ -132,7 +132,7 @@ npx cds watch
 ```
 
 ### 4. Accéder à l'application
-- **Dashboard UI :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
+- **Dashboard UI Fiori :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
 - **Endpoint OData V4 :** [http://localhost:4004/odata/v4/purchase-request](http://localhost:4004/odata/v4/purchase-request)
 
 ---

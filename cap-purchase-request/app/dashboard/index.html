@@ -3,41 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Request Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Purchase Request Manager - SAP Fiori</title>
+
+    <!-- Import Map for UI5 Web Components Bare Module Resolution -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@ui5/webcomponents-base/": "https://esm.sh/@ui5/webcomponents-base@2/",
+        "@ui5/webcomponents-icons/": "https://esm.sh/@ui5/webcomponents-icons@2/",
+        "@ui5/webcomponents-localization/": "https://esm.sh/@ui5/webcomponents-localization@2/",
+        "@ui5/webcomponents-theming/": "https://esm.sh/@ui5/webcomponents-theming@2/",
+        "@ui5/webcomponents/": "https://esm.sh/@ui5/webcomponents@2/"
+      }
+    }
+    </script>
+
+    <!-- UI5 Web Components CDN (v2) via esm.sh -->
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Assets.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/ShellBar.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Table.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/TableRow.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/TableCell.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/TableHeaderRow.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/TableHeaderCell.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Button.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Badge.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Panel.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/ObjectStatus.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Select.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/Option.js"></script>
+    <script type="module" src="https://esm.sh/@ui5/webcomponents@2/dist/BusyIndicator.js"></script>
+
     <style>
         :root {
-            --primary: #0a6ed1;
-            --primary-hover: #085caf;
-            --primary-light: #e8f3fc;
-            --bg-body: #f4f7fa;
-            --bg-card: #ffffff;
-            --text-main: #1d2d3e;
-            --text-muted: #6a7d93;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            
-            /* Status Colors */
-            --status-new-bg: #e0f2fe;
-            --status-new-text: #0369a1;
-            --status-sub-bg: #fef3c7;
-            --status-sub-text: #b45309;
-            --status-app-bg: #dcfce7;
-            --status-app-text: #15803d;
-            --status-rej-bg: #fee2e2;
-            --status-rej-text: #b91c1c;
-
-            /* Priority Colors */
-            --prio-high-bg: #ffe4e6;
-            --prio-high-text: #be123c;
-            --prio-med-bg: #ffedd5;
-            --prio-med-text: #c2410c;
-            --prio-low-bg: #f1f5f9;
-            --prio-low-text: #475569;
+            /* SAP Horizon Theme Color Palette */
+            --sapBrandColor: #0070f2;
+            --sapBackgroundColor: #f7f7f7;
+            --sapContent_ForegroundBorderColor: #89919a;
+            --sapPositiveColor: #257a3e;
+            --sapCriticalColor: #e76500;
+            --sapNegativeColor: #cd3934;
+            --sapInformativeColor: #0070f2;
+            --sapTile_Background: #ffffff;
+            --sapTextColor: #1d2d3e;
+            --sapContent_LabelColor: #6a7d93;
         }
 
         * {
@@ -47,441 +56,187 @@
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
+            font-family: "72", "72full", Arial, Helvetica, sans-serif;
+            background-color: var(--sapBackgroundColor);
+            color: var(--sapTextColor);
             line-height: 1.5;
-            padding: 0;
             min-height: 100vh;
         }
 
-        /* Top Navigation Header */
-        .navbar {
-            background-color: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 2px 4px rgba(10, 110, 209, 0.3);
-        }
-
-        .brand-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: -0.3px;
-        }
-
-        .brand-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .role-selector-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #f1f5f9;
-            padding: 4px 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .role-selector-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .role-selector-dropdown {
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            font-size: 13px;
-            font-weight: 600;
-            background-color: white;
-            color: var(--text-main);
-            cursor: pointer;
-            outline: none;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border-color: var(--border-color);
-            color: var(--text-main);
-        }
-
-        .btn-outline:hover {
-            background-color: #f8fafc;
-            border-color: #cbd5e1;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-success {
-            background-color: #16a34a;
-            color: white;
-        }
-
-        .btn-success:hover:not(:disabled) {
-            background-color: #15803d;
-        }
-
-        .btn-danger {
-            background-color: #dc2626;
-            color: white;
-        }
-
-        .btn-danger:hover:not(:disabled) {
-            background-color: #b91c1c;
-        }
-
-        .btn-ai {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            color: white;
-            border: none;
-            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-ai:hover:not(:disabled) {
-            background: linear-gradient(135deg, #4f46e5, #9333ea);
-            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(40%);
-        }
-
         /* Container Layout */
-        .main-container {
+        .fiori-container {
             max-width: 1400px;
-            margin: 24px auto;
-            padding: 0 24px;
+            margin: 20px auto;
+            padding: 0 20px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
-        /* Stats Cards */
-        .stats-grid {
+        /* Fiori KPI Cards Bar */
+        .kpi-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
         }
 
-        .stat-card {
-            background: var(--bg-card);
-            padding: 16px 20px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
+        .kpi-tile {
+            background-color: var(--sapTile_Background);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
 
-        .stat-label {
+        .kpi-title {
             font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
+            font-weight: 600;
+            color: var(--sapContent_LabelColor);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .stat-value {
+        .kpi-value {
             font-size: 24px;
             font-weight: 700;
-            color: var(--text-main);
+            color: var(--sapTextColor);
         }
 
-        /* Dashboard Split Layout */
-        .content-grid {
+        /* Grid Layout for Master / Detail */
+        .fiori-grid {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
-        /* Card Container */
-        .card {
-            background: var(--bg-card);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #fafbfd;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Tables */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 13px;
-        }
-
-        th {
-            background-color: #f8fafc;
-            color: var(--text-muted);
-            font-weight: 600;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-main);
-        }
-
-        tbody tr {
-            transition: background-color 0.15s ease;
-            cursor: pointer;
-        }
-
-        tbody tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        tbody tr.selected {
-            background-color: var(--primary-light) !important;
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .badge-new { background-color: var(--status-new-bg); color: var(--status-new-text); }
-        .badge-submitted { background-color: var(--status-sub-bg); color: var(--status-sub-text); }
-        .badge-approved { background-color: var(--status-app-bg); color: var(--status-app-text); }
-        .badge-rejected { background-color: var(--status-rej-bg); color: var(--status-rej-text); }
-
-        .badge-prio-high { background-color: var(--prio-high-bg); color: var(--prio-high-text); }
-        .badge-prio-medium { background-color: var(--prio-med-bg); color: var(--prio-med-text); }
-        .badge-prio-low { background-color: var(--prio-low-bg); color: var(--prio-low-text); }
-
-        .badge-risk-low { background-color: #dcfce7; color: #15803d; }
-        .badge-risk-medium { background-color: #fef3c7; color: #b45309; }
-        .badge-risk-high { background-color: #fee2e2; color: #b91c1c; }
-
-        /* Detail Panel */
-        .detail-panel {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .detail-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .detail-title-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .detail-pr-number {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .detail-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        /* Info Grid */
-        .info-grid {
+        /* Detail Information Grid */
+        .fiori-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             background: #f8fafc;
             padding: 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
         }
 
-        .info-item {
+        .fiori-info-item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
         }
 
-        .info-label {
+        .fiori-info-label {
             font-size: 11px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--sapContent_LabelColor);
             text-transform: uppercase;
         }
 
-        .info-value {
+        .fiori-info-value {
             font-size: 14px;
             font-weight: 600;
-            color: var(--text-main);
+            color: var(--sapTextColor);
         }
 
-        /* Reason Callout */
-        .reason-box {
-            background-color: #fef2f2;
-            border-left: 4px solid #ef4444;
+        /* Reject Reason Box */
+        .reject-reason-box {
+            background-color: #fde8e8;
+            border-left: 4px solid var(--sapNegativeColor);
             padding: 12px 16px;
             border-radius: 4px;
-            color: #991b1b;
+            color: #9b1c1c;
             font-size: 13px;
+            margin-bottom: 16px;
         }
 
-        .reason-box strong {
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        /* AI Card Encart */
-        .ai-card {
-            background: linear-gradient(135deg, #f8fafc, #faf5ff);
-            border: 1px solid #cbd5e1;
-            border-left: 4px solid #6366f1;
-            border-radius: 10px;
-            padding: 18px 20px;
+        /* AI Analysis Card */
+        .ai-fiori-card {
+            background: linear-gradient(135deg, #f0f7ff, #faf5ff);
+            border: 1px solid #bfe0ff;
+            border-left: 4px solid var(--sapBrandColor);
+            border-radius: 8px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            box-shadow: var(--shadow-sm);
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 16px;
         }
 
-        .ai-card-header {
+        .ai-fiori-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 8px;
             padding-bottom: 8px;
-            border-bottom: 1px dashed #e2e8f0;
+            border-bottom: 1px dashed #cbd5e1;
         }
 
-        .ai-card-title {
+        .ai-fiori-title {
             font-size: 14px;
             font-weight: 700;
-            color: #312e81;
+            color: #1e40af;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .ai-anomaly-box {
-            background-color: #fef2f2;
-            border-left: 3px solid #ef4444;
+        .ai-anomaly-banner {
+            background-color: #fde8e8;
+            border-left: 3px solid var(--sapNegativeColor);
             padding: 10px 14px;
-            border-radius: 6px;
-            color: #991b1b;
+            border-radius: 4px;
+            color: #9b1c1c;
             font-size: 13px;
         }
 
-        .ai-recommendation-box {
-            background-color: #eef2ff;
-            border-left: 3px solid #6366f1;
+        .ai-recommendation-banner {
+            background-color: #eff6ff;
+            border-left: 3px solid var(--sapBrandColor);
             padding: 10px 14px;
-            border-radius: 6px;
-            color: #3730a3;
+            border-radius: 4px;
+            color: #1e40af;
             font-size: 13px;
         }
 
-        /* Toast Notifications */
+        /* Table Wrapper */
+        .items-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .items-table th {
+            background-color: #f1f5f9;
+            color: var(--sapContent_LabelColor);
+            font-weight: 600;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .items-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--sapTextColor);
+        }
+
+        .items-table tbody tr:hover {
+            background-color: #e8f3fc;
+        }
+
+        /* Toast Notification Styling */
         #toast-container {
             position: fixed;
             bottom: 24px;
@@ -495,105 +250,121 @@
         .toast {
             min-width: 280px;
             padding: 12px 16px;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #1e293b;
             color: white;
             font-size: 13px;
-            font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        .toast-success { background: #15803d; }
-        .toast-error { background: #b91c1c; }
+        .toast-success { background: var(--sapPositiveColor); }
+        .toast-error { background: var(--sapNegativeColor); }
 
-        @keyframes slideIn {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Empty State */
-        .empty-state {
-            padding: 48px;
+        .empty-state-text {
+            padding: 32px;
             text-align: center;
-            color: var(--text-muted);
+            color: var(--sapContent_LabelColor);
             font-size: 14px;
         }
 
-        .amount {
-            font-family: monospace;
+        .btn-fiori {
+            padding: 7px 14px;
+            font-size: 13px;
             font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            color: var(--sapTextColor);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-fiori:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-fiori-primary {
+            background-color: var(--sapBrandColor);
+            color: white;
+            border-color: var(--sapBrandColor);
+        }
+
+        .btn-fiori-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-fiori-negative {
+            background-color: var(--sapNegativeColor);
+            color: white;
+            border-color: var(--sapNegativeColor);
+        }
+
+        .btn-fiori-negative:hover {
+            background-color: #a72824;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
-    <header class="navbar">
-        <div class="brand">
-            <div class="brand-logo">PR</div>
-            <div>
-                <h1 class="brand-title">Demandes d'Achat</h1>
-                <p class="brand-subtitle">CAP Purchase Request Service + AI Copilot</p>
+    <!-- SAP Fiori ShellBar Header -->
+    <ui5-shellbar
+        primary-title="Purchase Request Manager"
+        secondary-title="Extension CAP d'un backend SAP RAP"
+    >
+        <!-- Generic Corporate Logo Icon (No SAP trademarked logo) -->
+        <div slot="logo" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, #0070f2, #0056b3); color: white; border-radius: 6px; font-weight: 700; font-size: 14px; box-shadow: 0 2px 4px rgba(0,112,242,0.3);">
+            PR
+        </div>
+
+        <!-- Role Selector inside ShellBar -->
+        <div slot="profile" style="display: flex; align-items: center; gap: 10px; margin-right: 12px;">
+            <span style="font-size: 12px; font-weight: 600; color: #556b82;">👤 Rôle :</span>
+            <select id="role-select" onchange="onRoleChange()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; background-color: white; color: #1d2d3e; cursor: pointer; outline: none;">
+                <option value="jdupont|employee">Employé (jdupont)</option>
+                <option value="mlefevre|employee">Employé (mlefevre)</option>
+                <option value="zouguari|employee">Employé (zouguari)</option>
+                <option value="manager|manager" selected>Manager</option>
+            </select>
+            <button class="btn-fiori" onclick="loadRequests()">🔄 Rafraîchir</button>
+        </div>
+    </ui5-shellbar>
+
+    <!-- Main Fiori Container -->
+    <div class="fiori-container">
+
+        <!-- KPI Tiles Bar -->
+        <div class="kpi-bar">
+            <div class="kpi-tile">
+                <span class="kpi-title">Total Demandes Visibles</span>
+                <span class="kpi-value" id="stat-total">0</span>
+            </div>
+            <div class="kpi-tile">
+                <span class="kpi-title">En Attente (Submitted)</span>
+                <span class="kpi-value" id="stat-submitted" style="color: var(--sapCriticalColor)">0</span>
+            </div>
+            <div class="kpi-tile">
+                <span class="kpi-title">Approuvées</span>
+                <span class="kpi-value" id="stat-approved" style="color: var(--sapPositiveColor)">0</span>
+            </div>
+            <div class="kpi-tile">
+                <span class="kpi-title">Montant Total Global</span>
+                <span class="kpi-value" id="stat-amount" style="font-family: monospace;">0.00 EUR</span>
             </div>
         </div>
-        <div class="nav-actions">
-            <!-- Role Selector -->
-            <div class="role-selector-container">
-                <span class="role-selector-label">👤 Rôle :</span>
-                <select id="role-select" class="role-selector-dropdown" onchange="onRoleChange()">
-                    <option value="jdupont|employee">Employé (jdupont)</option>
-                    <option value="mlefevre|employee">Employé (mlefevre)</option>
-                    <option value="zouguari|employee">Employé (zouguari)</option>
-                    <option value="manager|manager" selected>Manager</option>
-                </select>
-            </div>
-            <button class="btn btn-outline" id="btn-refresh" onclick="loadRequests()">
-                🔄 Rafraîchir
-            </button>
-        </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="main-container">
+        <!-- Fiori Master / Detail Layout -->
+        <div class="fiori-grid">
 
-        <!-- Stats Overview -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-label">Total Demandes Visibles</span>
-                <span class="stat-value" id="stat-total">0</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">En Attente (Submitted)</span>
-                <span class="stat-value" id="stat-submitted" style="color: var(--status-sub-text)">0</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Approuvées</span>
-                <span class="stat-value" id="stat-approved" style="color: var(--status-app-text)">0</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Montant Total Global</span>
-                <span class="stat-value amount" id="stat-amount">0.00 EUR</span>
-            </div>
-        </section>
-
-        <!-- Content Grid -->
-        <div class="content-grid">
-
-            <!-- Master Table Card -->
-            <section class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        📋 Liste des Demandes d'Achat
-                        <span id="role-view-badge"></span>
-                    </h2>
-                    <span id="list-count" style="font-size: 12px; color: var(--text-muted); font-weight: 500;">0 demande(s)</span>
+            <!-- Fiori List Report Table Panel -->
+            <ui5-panel header-text="📋 Liste des Demandes d'Achat">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div id="role-view-badge"></div>
+                    <span id="list-count" style="font-size: 12px; color: var(--sapContent_LabelColor); font-weight: 600;">0 demande(s)</span>
                 </div>
-                <div class="table-responsive">
-                    <table>
+
+                <div class="items-table-wrapper">
+                    <table class="items-table">
                         <thead>
                             <tr>
                                 <th>N° PR</th>
@@ -608,30 +379,27 @@
                         </thead>
                         <tbody id="table-body">
                             <tr>
-                                <td colspan="8" class="empty-state">Chargement des données...</td>
+                                <td colspan="8" class="empty-state-text">Chargement des données Fiori...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </ui5-panel>
 
-            <!-- Detail Section Card -->
-            <section class="card" id="detail-card">
-                <div class="card-header">
-                    <h2 class="card-title">🔍 Détail de la Demande</h2>
-                </div>
-                <div id="detail-content" class="detail-panel">
-                    <div class="empty-state">
-                        Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions.
+            <!-- Fiori Detail Panel -->
+            <ui5-panel id="detail-panel" header-text="🔍 Détail de la Demande">
+                <div id="detail-content" style="padding: 12px 0;">
+                    <div class="empty-state-text">
+                        Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions Fiori.
                     </div>
                 </div>
-            </section>
+            </ui5-panel>
 
         </div>
 
-    </main>
+    </div>
 
-    <!-- Toast Notifications -->
+    <!-- Toast Notifications Container -->
     <div id="toast-container"></div>
 
     <script>
@@ -685,12 +453,12 @@
                     renderEmptyDetail();
                 }
 
-                showToast(`Données chargées (${currentUser.role === 'manager' ? 'Vue Manager' : 'Vue Employé: ' + currentUser.name})`, 'success');
+                showToast(`Données Fiori chargées (${currentUser.role === 'manager' ? 'Vue Manager' : 'Vue Employé: ' + currentUser.name})`, 'success');
             } catch (err) {
                 console.error(err);
                 showToast(`Impossible de charger les données: ${err.message}`, 'error');
                 document.getElementById('table-body').innerHTML = `
-                    <tr><td colspan="8" class="empty-state" style="color: red;">Erreur: ${err.message}</td></tr>
+                    <tr><td colspan="8" class="empty-state-text" style="color: var(--sapNegativeColor);">Erreur: ${err.message}</td></tr>
                 `;
             }
         }
@@ -699,9 +467,9 @@
             const container = document.getElementById('role-view-badge');
             if (!container) return;
             if (currentUser.role === 'manager') {
-                container.innerHTML = `<span class="badge badge-submitted" style="margin-left: 8px;">Vue Manager (toutes les demandes)</span>`;
+                container.innerHTML = `<ui5-object-status state="Critical">Vue Manager (Toutes les demandes)</ui5-object-status>`;
             } else {
-                container.innerHTML = `<span class="badge badge-new" style="margin-left: 8px;">Vue Employé (${currentUser.name})</span>`;
+                container.innerHTML = `<ui5-object-status state="Informative">Vue Employé (${currentUser.name})</ui5-object-status>`;
             }
         }
 
@@ -716,16 +484,16 @@
             document.getElementById('list-count').textContent = `${requestsData.length} demande(s)`;
         }
 
-        // Render Master Table
+        // Render Fiori Table
         function renderTable() {
             const tbody = document.getElementById('table-body');
             if (requestsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Aucune demande d'achat trouvée pour ce rôle.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state-text">Aucune demande d'achat trouvée pour ce rôle.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = requestsData.map(r => `
-                <tr class="${r.ID === selectedPrId ? 'selected' : ''}" onclick="selectRow('${r.ID}')">
+                <tr style="cursor: pointer; background-color: ${r.ID === selectedPrId ? '#e8f3fc' : 'transparent'};" onclick="selectRow('${r.ID}')">
                     <td><strong>${r.PrNumber || '-'}</strong></td>
                     <td>${r.Requester || '-'}</td>
                     <td>${r.Description || '-'}</td>
@@ -733,7 +501,7 @@
                     <td>${getPrioBadge(r.Priority)}</td>
                     <td>${getStatusBadge(r.Status)}</td>
                     <td>${r.RequestedDate || '-'}</td>
-                    <td class="amount">${formatCurrency(r.TotalAmount, r.Currency)}</td>
+                    <td style="font-family: monospace; font-weight: 600;">${formatCurrency(r.TotalAmount, r.Currency)}</td>
                 </tr>
             `).join('');
         }
@@ -746,7 +514,7 @@
             if (pr) renderDetail(pr);
         }
 
-        // Render Detail Panel with Role-based Button Visibility
+        // Render Fiori Detail View
         function renderDetail(pr) {
             const container = document.getElementById('detail-content');
 
@@ -761,27 +529,9 @@
             const showApprove = isManager && isSubmitted;
             const showReject = isManager && isSubmitted;
 
-            const submitBtnHtml = showSubmit ? `
-                <button class="btn btn-primary" onclick="executeAction('${pr.ID}', 'submit')">
-                    📤 Soumettre (Submit)
-                </button>
-            ` : '';
-
-            const approveBtnHtml = showApprove ? `
-                <button class="btn btn-success" onclick="executeAction('${pr.ID}', 'approve')">
-                    ✅ Approuver (Approve)
-                </button>
-            ` : '';
-
-            const rejectBtnHtml = showReject ? `
-                <button class="btn btn-danger" onclick="executeAction('${pr.ID}', 'reject')">
-                    ❌ Rejeter (Reject)
-                </button>
-            ` : '';
-
             const itemsHtml = (pr.Items && pr.Items.length > 0) ? `
-                <div class="table-responsive">
-                    <table>
+                <div class="items-table-wrapper">
+                    <table class="items-table">
                         <thead>
                             <tr>
                                 <th>Item N°</th>
@@ -799,68 +549,68 @@
                                     <td><strong>${it.Product || '-'}</strong></td>
                                     <td>${it.Quantity || 0}</td>
                                     <td>${it.Unit || 'EA'}</td>
-                                    <td class="amount">${formatCurrency(it.Price, it.Currency)}</td>
-                                    <td class="amount"><strong>${formatCurrency(it.ItemAmount, it.Currency)}</strong></td>
+                                    <td style="font-family: monospace;">${formatCurrency(it.Price, it.Currency)}</td>
+                                    <td style="font-family: monospace; font-weight: 700;">${formatCurrency(it.ItemAmount, it.Currency)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
-            ` : `<div class="empty-state">Aucun article dans cette demande.</div>`;
+            ` : `<div class="empty-state-text">Aucun article dans cette demande.</div>`;
 
             const reasonHtml = pr.RejectReason ? `
-                <div class="reason-box">
+                <div class="reject-reason-box">
                     <strong>Motif du rejet :</strong>
                     ${pr.RejectReason}
                 </div>
             ` : '';
 
             container.innerHTML = `
-                <div class="detail-header">
-                    <div class="detail-title-group">
-                        <span class="detail-pr-number">${pr.PrNumber}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 22px; font-weight: 700; color: var(--sapTextColor);">${pr.PrNumber}</span>
                         ${getStatusBadge(pr.Status)}
                         ${getPrioBadge(pr.Priority)}
                     </div>
-                    <div class="detail-actions">
-                        <button class="btn btn-ai" id="btn-ai-analyze" onclick="runAIAnalysis('${pr.ID}')">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-fiori" id="btn-ai-analyze" onclick="runAIAnalysis('${pr.ID}')">
                             🤖 AI Analysis
                         </button>
-                        ${submitBtnHtml}
-                        ${approveBtnHtml}
-                        ${rejectBtnHtml}
+                        ${showSubmit ? `<button class="btn-fiori btn-fiori-primary" onclick="executeAction('${pr.ID}', 'submit')">📤 Soumettre (Submit)</button>` : ''}
+                        ${showApprove ? `<button class="btn-fiori btn-fiori-primary" onclick="executeAction('${pr.ID}', 'approve')">✅ Approuver (Approve)</button>` : ''}
+                        ${showReject ? `<button class="btn-fiori btn-fiori-negative" onclick="executeAction('${pr.ID}', 'reject')">❌ Rejeter (Reject)</button>` : ''}
                     </div>
                 </div>
 
                 ${reasonHtml}
 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Demandeur</span>
-                        <span class="info-value">${pr.Requester || '-'}</span>
+                <div class="fiori-info-grid">
+                    <div class="fiori-info-item">
+                        <span class="fiori-info-label">Demandeur</span>
+                        <span class="fiori-info-value">${pr.Requester || '-'}</span>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Description</span>
-                        <span class="info-value">${pr.Description || '-'}</span>
+                    <div class="fiori-info-item">
+                        <span class="fiori-info-label">Description</span>
+                        <span class="fiori-info-value">${pr.Description || '-'}</span>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Catégorie</span>
-                        <span class="info-value">${pr.Category || '-'}</span>
+                    <div class="fiori-info-item">
+                        <span class="fiori-info-label">Catégorie</span>
+                        <span class="fiori-info-value">${pr.Category || '-'}</span>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Date Demandée</span>
-                        <span class="info-value">${pr.RequestedDate || '-'}</span>
+                    <div class="fiori-info-item">
+                        <span class="fiori-info-label">Date Demandée</span>
+                        <span class="fiori-info-value">${pr.RequestedDate || '-'}</span>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Montant Total</span>
-                        <span class="info-value amount" style="color: var(--primary)">${formatCurrency(pr.TotalAmount, pr.Currency)}</span>
+                    <div class="fiori-info-item">
+                        <span class="fiori-info-label">Montant Total</span>
+                        <span class="fiori-info-value" style="font-family: monospace; color: var(--sapBrandColor);">${formatCurrency(pr.TotalAmount, pr.Currency)}</span>
                     </div>
                 </div>
 
                 <div id="ai-result-container"></div>
 
                 <div>
-                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">
+                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--sapTextColor);">
                         📦 Articles Inclus (${pr.Items ? pr.Items.length : 0})
                     </h3>
                     ${itemsHtml}
@@ -870,8 +620,8 @@
 
         function renderEmptyDetail() {
             document.getElementById('detail-content').innerHTML = `
-                <div class="empty-state">
-                    Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions.
+                <div class="empty-state-text">
+                    Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions Fiori.
                 </div>
             `;
         }
@@ -920,12 +670,12 @@
 
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ Analyse IA en cours...';
+                btn.textContent = '⏳ Analyse IA en cours...';
             }
 
             if (aiContainer) {
                 aiContainer.innerHTML = `
-                    <div class="ai-card" style="text-align: center; color: #4338ca;">
+                    <div class="ai-fiori-card" style="text-align: center; color: var(--sapBrandColor);">
                         <div>🤖 L'IA Groq (Llama 3.3 70B) analyse la demande d'achat et ses articles...</div>
                     </div>
                 `;
@@ -958,7 +708,7 @@
                 showToast(`Échec de l'analyse IA : ${err.message}`, 'error');
                 if (aiContainer) {
                     aiContainer.innerHTML = `
-                        <div class="reason-box">
+                        <div class="reject-reason-box">
                             <strong>Erreur d'analyse IA :</strong> ${err.message}
                         </div>
                     `;
@@ -966,7 +716,7 @@
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = '🤖 AI Analysis';
+                    btn.textContent = '🤖 AI Analysis';
                 }
             }
         }
@@ -975,56 +725,65 @@
             const container = document.getElementById('ai-result-container');
             if (!container) return;
 
-            let riskBadgeClass = 'badge-risk-low';
-            if ((ai.risk_level || '').toLowerCase() === 'medium') riskBadgeClass = 'badge-risk-medium';
-            if ((ai.risk_level || '').toLowerCase() === 'high') riskBadgeClass = 'badge-risk-high';
+            let riskState = 'Positive';
+            if ((ai.risk_level || '').toLowerCase() === 'medium') riskState = 'Critical';
+            if ((ai.risk_level || '').toLowerCase() === 'high') riskState = 'Negative';
 
             const anomalyHtml = ai.anomaly_detected ? `
-                <div class="ai-anomaly-box">
+                <div class="ai-anomaly-banner">
                     <strong>⚠️ Anomalie / Risque Détecté :</strong>
                     ${ai.anomaly_reason || 'Anomalie identifiée sur cette demande.'}
                 </div>
             ` : '';
 
             container.innerHTML = `
-                <div class="ai-card">
-                    <div class="ai-card-header">
-                        <div class="ai-card-title">
+                <div class="ai-fiori-card">
+                    <div class="ai-fiori-header">
+                        <div class="ai-fiori-title">
                             ✨ Rapport d'Analyse IA (Groq Llama 3.3 70B)
                         </div>
-                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <span style="font-size: 12px; color: #64748b; font-weight: 500;">Catégorie suggérée : <strong>${ai.category_suggestion || 'N/A'}</strong></span>
-                            <span class="badge ${riskBadgeClass}">Niveau de Risque : ${ai.risk_level || 'Low'}</span>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-size: 12px; color: var(--sapContent_LabelColor); font-weight: 600;">Catégorie suggérée : <strong>${ai.category_suggestion || 'N/A'}</strong></span>
+                            <ui5-object-status state="${riskState}">Niveau de Risque : ${ai.risk_level || 'Low'}</ui5-object-status>
                         </div>
                     </div>
-                    <div style="font-size: 13px; color: #334155; line-height: 1.6;">
+                    <div style="font-size: 13px; color: var(--sapTextColor); line-height: 1.6;">
                         <strong>Résumé :</strong> ${ai.summary || 'Aucun résumé disponible.'}
                     </div>
                     ${anomalyHtml}
-                    <div class="ai-recommendation-box">
+                    <div class="ai-recommendation-banner">
                         <strong>💡 Recommandation :</strong> ${ai.recommendation || 'Procéder à l\'évaluation standard.'}
                     </div>
                 </div>
             `;
         }
 
-        // Helper UI Badges
+        // Fiori ObjectStatus Helper for Status Badges
         function getStatusBadge(status) {
             switch ((status || '').toUpperCase()) {
-                case 'NEW': return `<span class="badge badge-new">NEW</span>`;
-                case 'SUBMITTED': return `<span class="badge badge-submitted">SUBMITTED</span>`;
-                case 'APPROVED': return `<span class="badge badge-approved">APPROVED</span>`;
-                case 'REJECTED': return `<span class="badge badge-rejected">REJECTED</span>`;
-                default: return `<span class="badge">${status || 'UNKNOWN'}</span>`;
+                case 'APPROVED':
+                    return `<ui5-object-status state="Positive">APPROVED</ui5-object-status>`;
+                case 'REJECTED':
+                    return `<ui5-object-status state="Negative">REJECTED</ui5-object-status>`;
+                case 'SUBMITTED':
+                    return `<ui5-object-status state="Critical">SUBMITTED</ui5-object-status>`;
+                case 'NEW':
+                    return `<ui5-object-status state="Informative">NEW</ui5-object-status>`;
+                default:
+                    return `<ui5-object-status state="None">${status || 'UNKNOWN'}</ui5-object-status>`;
             }
         }
 
         function getPrioBadge(prio) {
             switch ((prio || '').toUpperCase()) {
-                case 'HIGH': return `<span class="badge badge-prio-high">HIGH</span>`;
-                case 'MEDIUM': return `<span class="badge badge-prio-medium">MEDIUM</span>`;
-                case 'LOW': return `<span class="badge badge-prio-low">LOW</span>`;
-                default: return `<span class="badge">${prio || '-'}</span>`;
+                case 'HIGH':
+                    return `<ui5-badge color-scheme="1">HIGH</ui5-badge>`;
+                case 'MEDIUM':
+                    return `<ui5-badge color-scheme="2">MEDIUM</ui5-badge>`;
+                case 'LOW':
+                    return `<ui5-badge color-scheme="8">LOW</ui5-badge>`;
+                default:
+                    return `<ui5-badge>${prio || '-'}</ui5-badge>`;
             }
         }
 
