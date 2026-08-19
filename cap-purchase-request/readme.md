@@ -1,6 +1,6 @@
-# CAP Purchase Request Service (+ AI Copilot)
+# CAP Purchase Request Service (+ AI Copilot & SAP Fiori UI)
 
-> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation moderne, une simulation de rôles (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation Fiori, une simulation de rôles par instance (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
 
 ---
 
@@ -23,31 +23,27 @@
 
 ---
 
-## 📸 Aperçu & Captures d'Écran
+## 📸 Aperçu & Captures d'Écran (Interface SAP Fiori)
 
-### 1. Interface SAP Fiori (Horizon Theme & UI5 Web Components)
-Design inspiré des applications SAP Fiori officielles avec `<ui5-shellbar>`, palette de couleurs Horizon, et badges de statut `<ui5-object-status>`.
-![Interface SAP Fiori Redesign](screenshots/07-fiori-redesign.png)
+### 1. Vue Manager — Liste Globale des Demandes d'Achat
+Vue globale des demandes d'achat pour le rôle **Manager** avec cartes KPI, ShellBar SAP Fiori et filtres d'affichage.
+![Vue Manager - Liste Globale](screenshots/01-list-purchase-requests.png)
 
-### 2. Vue Détail avec Articles Inclus
-Détail d'une demande sélectionnée avec calcul automatique des sous-totaux par article et du montant global (3 600,00 EUR).
-![Détail avec Articles](screenshots/02-detail-with-items.png)
+### 2. Vue Employé — Consultation d'une Demande (`mlefevre`)
+Vue restreinte pour un **Employé** (`mlefevre`) ne visualisant que sa propre demande. Les boutons d'approbation/rejet sont masqués.
+![Vue Employé - Consultation](screenshots/02-detail-with-items.png)
 
-### 3. Action de Soumission ("Submit")
-Soumission d'une demande d'achat à l'état `NEW`, faisant passer son statut à `SUBMITTED`.
-![Action Submit](screenshots/03-submit-action.png)
+### 3. Vue Employé — Action de Soumission (`zouguari`)
+Soumission d'une demande d'achat `NEW` par son demandeur (`zouguari`), déclenchant la mise à jour à l'état `SUBMITTED` avec notification toast.
+![Vue Employé - Action Soumettre](screenshots/03-submit-action.png)
 
-### 4. Workflow d'Approbation et Rejet
-Validation ou rejet d'une demande soumise avec mise à jour en temps réel des statuts selon le rôle actif (Manager).
-![Workflow Approve/Reject](screenshots/04-approve-reject-workflow.png)
+### 4. Vue Manager — Action d'Approbation & Rejet
+Validation d'une demande soumise par le **Manager** avec notification de confirmation `Action 'approve' exécutée avec succès !`.
+![Vue Manager - Action Approuver/Rejeter](screenshots/04-approve-reject-workflow.png)
 
-### 5. Gestion des Erreurs et Validations de Transitions (HTTP 403)
-Contrôle des règles de gestion et filtrage d'autorisation par instance côté serveur.
-![Erreur Transition Invalide](screenshots/05-error-invalid-transition.png)
-
-### 6. Analyse Intelligente par IA (Détection d'Anomalie)
-Rapport d'analyse généré à la volée par l'IA Groq détectant une anomalie de tarif sur une demande suspecte.
-![Analyse IA](screenshots/06-ai-analysis-anomaly.png)
+### 5. Analyse Intelligente par IA — Rapport SAP Fiori (Groq Llama 3.3 70B)
+Rapport d'analyse généré à la volée par l'IA Groq intégré dans le panneau SAP Fiori avec suggestion de catégorie, résumé et recommandation.
+![Rapport d'Analyse IA Fiori](screenshots/05-ai-analysis-fiori.png)
 
 ---
 
