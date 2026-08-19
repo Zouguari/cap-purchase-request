@@ -1,6 +1,6 @@
 # CAP Purchase Request Service (+ AI Copilot & SAP Fiori UI)
 
-> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation Fiori, une simulation de rôles par instance (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+> Application Node.js basée sur **SAP Cloud Application Programming Model (CAP)** qui étend un backend SAP RAP (RESTful Application Programming) existant avec un workflow d'approbation Fiori, une vue analytique interactive (Chart.js), une simulation de rôles par instance (Employé/Manager) et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
 
 ---
 
@@ -15,7 +15,7 @@
                                                   │
                                                   ▼
 ┌───────────────────────────┐      ┌─────────────────────────────┐
-│  SAP Fiori UI5 Web Comp.  │ ◄─── │       OData V4 Endpoint     │
+│  SAP Fiori UI5 + Chart.js │ ◄─── │       OData V4 Endpoint     │
 └───────────────────────────┘      └─────────────────────────────┘
 ```
 
@@ -45,6 +45,10 @@ Validation d'une demande soumise par le **Manager** avec notification de confirm
 Rapport d'analyse généré à la volée par l'IA Groq intégré dans le panneau SAP Fiori avec suggestion de catégorie, résumé et recommandation.
 ![Rapport d'Analyse IA Fiori](screenshots/05-ai-analysis-fiori.png)
 
+### 6. Vue Analytique Interactive (Graphiques Chart.js)
+Nouvel onglet Analytics présentant 3 graphiques interactifs (Donut par statut, Barres par catégorie, et Top 5 par montant) calculés en temps réel à partir des données filtrées par rôle.
+![Vue Analytics Chart.js](screenshots/06-analytics-view.png)
+
 ---
 
 ## 🤖 Analyse IA (Groq / Llama 3.3 70B)
@@ -61,20 +65,14 @@ L'IA génère un rapport structuré en JSON contenant :
 - **Détection d'anomalie :** Booléen (`anomaly_detected`) accompagné de sa justification (`anomaly_reason`).
 - **Recommandation décisionnelle :** Conseil clair pour l'approbateur.
 
-### Exemple concret (Preuve de détection d'anomalie)
-Test réalisé sur un cas suspect (Demande d'achat d'un stylo bille à **50 000,00 EUR**) :
+---
 
-```json
-{
-  "@odata.context": "../$metadata#AIAnalysisResult",
-  "category_suggestion": "Fournitures de bureau",
-  "risk_level": "High",
-  "summary": "Demande d'achat pour un stylo bille bleu d'un montant total de 50 000 EUR. Le prix unitaire semble anormalement élevé.",
-  "anomaly_detected": true,
-  "anomaly_reason": "Le prix unitaire de 50 000 EUR pour un stylo bille est incohérent avec les tarifs habituels du marché.",
-  "recommendation": "Vérifier la cohérence du prix avec les fournisseurs avant toute approbation."
-}
-```
+## 📊 Vue Analytique (Chart.js)
+
+L'onglet **Analytics & Graphiques** inclut 3 visualisations interactives calculées dynamiquement côté client :
+1. **🍩 Répartition par Statut (Donut Chart) :** Répartition des demandes par état (`NEW`, `SUBMITTED`, `APPROVED`, `REJECTED`) aux couleurs Fiori Horizon.
+2. **📊 Montant Total par Catégorie (Bar Chart) :** Aggregation des montants cumulés par secteur de dépense (`IT`, `OFFICE`, etc.).
+3. **🏆 Top 5 des Demandes par Montant (Horizontal Bar Chart) :** Classement des 5 plus importantes demandes d'achat par montant total.
 
 ---
 
@@ -83,29 +81,10 @@ Test réalisé sur un cas suspect (Demande d'achat d'un stylo bille à **50 000,
 - **Framework Backend :** SAP CAP (Cloud Application Programming Model) / Node.js
 - **Design System UI :** SAP Fiori Horizon Theme (`--sapBrandColor`, `--sapBackgroundColor`, police Fiori 72)
 - **Composants UI :** `@ui5/webcomponents` v2 (`ui5-shellbar`, `ui5-panel`, `ui5-object-status`, `ui5-badge`, `ui5-button`)
+- **Librairie Graphique :** Chart.js v4 (Donut, Bar, Horizontal Bar)
 - **Moteur IA :** Groq API (Modèle LLM `llama-3.3-70b-versatile` / `groq/compound`)
 - **Protocole de Service :** OData V4 (avec Actions personnalisées `submit`, `approve`, `reject`, `analyzeWithAI`)
 - **Base de Données :** SQLite (In-Memory avec initialisation CSV automatique)
-
----
-
-## ⚙️ Fonctionnalités Clés
-
-- **Interface SAP Fiori Horizon :** ShellBar avec sélecteur de rôle, cartes KPI, tableaux réactifs et badges de statut Fiori `ui5-object-status` (`Positive`, `Critical`, `Negative`, `Informative`).
-- **Simulation de Rôles & Autorisation par Instance :**
-  - Mode **Employé** : l'utilisateur ne voit que ses propres demandes et ne peut soumettre que ses demandes à l'état `NEW`.
-  - Mode **Manager** : accès global à toutes les demandes et droits d'approbation/rejet.
-  - Sécurité backend : rejet HTTP 403 en cas de tentative d'action non autorisée.
-- **Calcul Automatique des Montants :**
-  - Recalcul dynamique de `ItemAmount` (`Quantity * Price`).
-  - Agrégation automatique du `TotalAmount` global.
-
----
-
-## ⚠️ Limites Connues
-
-- **Calibrage de la sévérité du risque :** Le niveau de risque (`risk_level`) attribué par le modèle LLM peut parfois être évalué à `Medium` au lieu de `Low` sur certains achats standards ordinaires selon la formulation des descriptions.
-- **Base de données In-Memory :** En mode développement local (`cds watch`), la base SQLite est réinitialisée au redémarrage à partir des fichiers CSV.
 
 ---
 
@@ -130,9 +109,3 @@ npx cds watch
 ### 4. Accéder à l'application
 - **Dashboard UI Fiori :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
 - **Endpoint OData V4 :** [http://localhost:4004/odata/v4/purchase-request](http://localhost:4004/odata/v4/purchase-request)
-
----
-
-## 🔮 Prochaines Étapes
-
-- **Connexion au backend SAP RAP distant :** Activation de la liaison OData V4 directe avec le service S/4HANA Cloud / BTP (`ZUI_PURCHASEREQUEST`) dès l'obtention des identifiants BTP définitifs. *(Toute l'architecture CDS, les entités et la couche d'orchestration sont déjà prêtes ; seule la configuration de connexion nécessitera une mise à jour).*

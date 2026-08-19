@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Purchase Request Manager - SAP Fiori</title>
 
+    <!-- Chart.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
     <!-- Import Map for UI5 Web Components Bare Module Resolution -->
     <script type="importmap">
     {
@@ -63,6 +66,37 @@
             min-height: 100vh;
         }
 
+        /* Tabs Navigation */
+        .tabs-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 24px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .tab-btn {
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--sapContent_LabelColor);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--sapBrandColor);
+        }
+
+        .tab-btn.active {
+            color: var(--sapBrandColor);
+            border-bottom-color: var(--sapBrandColor);
+        }
+
         /* Container Layout */
         .fiori-container {
             max-width: 1400px;
@@ -109,6 +143,21 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-card-content {
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
         }
 
         /* Detail Information Grid */
@@ -330,71 +379,124 @@
         </div>
     </ui5-shellbar>
 
+    <!-- Fiori Navigation Tabs -->
+    <nav class="tabs-header">
+        <button id="tab-btn-requests" class="tab-btn active" onclick="switchTab('requests')">
+            📋 Purchase Requests
+        </button>
+        <button id="tab-btn-analytics" class="tab-btn" onclick="switchTab('analytics')">
+            📊 Analytics & Graphiques
+        </button>
+    </nav>
+
     <!-- Main Fiori Container -->
     <div class="fiori-container">
 
-        <!-- KPI Tiles Bar -->
-        <div class="kpi-bar">
-            <div class="kpi-tile">
-                <span class="kpi-title">Total Demandes Visibles</span>
-                <span class="kpi-value" id="stat-total">0</span>
+        <!-- VUE 1 : PURCHASE REQUESTS (MASTER / DETAIL) -->
+        <div id="view-requests">
+            <!-- KPI Tiles Bar -->
+            <div class="kpi-bar" style="margin-bottom: 20px;">
+                <div class="kpi-tile">
+                    <span class="kpi-title">Total Demandes Visibles</span>
+                    <span class="kpi-value" id="stat-total">0</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="kpi-title">En Attente (Submitted)</span>
+                    <span class="kpi-value" id="stat-submitted" style="color: var(--sapCriticalColor)">0</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="kpi-title">Approuvées</span>
+                    <span class="kpi-value" id="stat-approved" style="color: var(--sapPositiveColor)">0</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="kpi-title">Montant Total Global</span>
+                    <span class="kpi-value" id="stat-amount" style="font-family: monospace;">0.00 EUR</span>
+                </div>
             </div>
-            <div class="kpi-tile">
-                <span class="kpi-title">En Attente (Submitted)</span>
-                <span class="kpi-value" id="stat-submitted" style="color: var(--sapCriticalColor)">0</span>
-            </div>
-            <div class="kpi-tile">
-                <span class="kpi-title">Approuvées</span>
-                <span class="kpi-value" id="stat-approved" style="color: var(--sapPositiveColor)">0</span>
-            </div>
-            <div class="kpi-tile">
-                <span class="kpi-title">Montant Total Global</span>
-                <span class="kpi-value" id="stat-amount" style="font-family: monospace;">0.00 EUR</span>
+
+            <div class="fiori-grid">
+                <!-- Fiori List Report Table Panel -->
+                <ui5-panel header-text="📋 Liste des Demandes d'Achat">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div id="role-view-badge"></div>
+                        <span id="list-count" style="font-size: 12px; color: var(--sapContent_LabelColor); font-weight: 600;">0 demande(s)</span>
+                    </div>
+
+                    <div class="items-table-wrapper">
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>N° PR</th>
+                                    <th>Demandeur</th>
+                                    <th>Description</th>
+                                    <th>Catégorie</th>
+                                    <th>Priorité</th>
+                                    <th>Statut</th>
+                                    <th>Date Demandée</th>
+                                    <th>Montant Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td colspan="8" class="empty-state-text">Chargement des données Fiori...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ui5-panel>
+
+                <!-- Fiori Detail Panel -->
+                <ui5-panel id="detail-panel" header-text="🔍 Détail de la Demande">
+                    <div id="detail-content" style="padding: 12px 0;">
+                        <div class="empty-state-text">
+                            Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions Fiori.
+                        </div>
+                    </div>
+                </ui5-panel>
             </div>
         </div>
 
-        <!-- Fiori Master / Detail Layout -->
-        <div class="fiori-grid">
-
-            <!-- Fiori List Report Table Panel -->
-            <ui5-panel header-text="📋 Liste des Demandes d'Achat">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <div id="role-view-badge"></div>
-                    <span id="list-count" style="font-size: 12px; color: var(--sapContent_LabelColor); font-weight: 600;">0 demande(s)</span>
+        <!-- VUE 2 : ANALYTICS & GRAPHIQUES -->
+        <div id="view-analytics" style="display: none;">
+            <!-- Analytics Summary KPI Bar -->
+            <div class="kpi-bar" style="margin-bottom: 20px;">
+                <div class="kpi-tile">
+                    <span class="kpi-title">Total Demandes Аналиtics</span>
+                    <span class="kpi-value" id="analytics-stat-total">0</span>
                 </div>
-
-                <div class="items-table-wrapper">
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th>N° PR</th>
-                                <th>Demandeur</th>
-                                <th>Description</th>
-                                <th>Catégorie</th>
-                                <th>Priorité</th>
-                                <th>Statut</th>
-                                <th>Date Demandée</th>
-                                <th>Montant Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <tr>
-                                <td colspan="8" class="empty-state-text">Chargement des données Fiori...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="kpi-tile">
+                    <span class="kpi-title">Montant Total Cumulé</span>
+                    <span class="kpi-value" id="analytics-stat-amount" style="font-family: monospace; color: var(--sapBrandColor)">0.00 EUR</span>
                 </div>
-            </ui5-panel>
+                <div class="kpi-tile">
+                    <span class="kpi-title">En Attente d'Approbation</span>
+                    <span class="kpi-value" id="analytics-stat-submitted" style="color: var(--sapCriticalColor)">0</span>
+                </div>
+            </div>
 
-            <!-- Fiori Detail Panel -->
-            <ui5-panel id="detail-panel" header-text="🔍 Détail de la Demande">
-                <div id="detail-content" style="padding: 12px 0;">
-                    <div class="empty-state-text">
-                        Sélectionnez une demande dans le tableau ci-dessus pour afficher ses détails et ses actions Fiori.
+            <!-- Charts Grid -->
+            <div class="analytics-grid">
+                <!-- Donut Chart: Status Distribution -->
+                <ui5-panel header-text="🍩 Répartition des Demandes par Statut">
+                    <div class="chart-card-content">
+                        <canvas id="chart-status" style="max-height: 260px;"></canvas>
                     </div>
-                </div>
-            </ui5-panel>
+                </ui5-panel>
 
+                <!-- Bar Chart: Amount by Category -->
+                <ui5-panel header-text="📊 Montant Total par Catégorie (EUR)">
+                    <div class="chart-card-content">
+                        <canvas id="chart-category" style="max-height: 260px;"></canvas>
+                    </div>
+                </ui5-panel>
+
+                <!-- Horizontal Bar Chart: Top 5 PRs -->
+                <ui5-panel header-text="🏆 Top 5 Demandes les Plus Élevées (EUR)" style="grid-column: 1 / -1;">
+                    <div class="chart-card-content">
+                        <canvas id="chart-top5" style="max-height: 260px;"></canvas>
+                    </div>
+                </ui5-panel>
+            </div>
         </div>
 
     </div>
@@ -409,12 +511,31 @@
 
         // Active role context
         let currentUser = { name: 'manager', role: 'manager' };
+        let activeTab = 'requests';
+
+        // Chart instances
+        let statusChart = null;
+        let categoryChart = null;
+        let top5Chart = null;
 
         function getMockHeaders() {
             return {
                 'x-mock-user': currentUser.name,
                 'x-mock-role': currentUser.role
             };
+        }
+
+        function switchTab(tabName) {
+            activeTab = tabName;
+            document.getElementById('view-requests').style.display = tabName === 'requests' ? 'block' : 'none';
+            document.getElementById('view-analytics').style.display = tabName === 'analytics' ? 'block' : 'none';
+
+            document.getElementById('tab-btn-requests').classList.toggle('active', tabName === 'requests');
+            document.getElementById('tab-btn-analytics').classList.toggle('active', tabName === 'analytics');
+
+            if (tabName === 'analytics') {
+                renderAnalytics();
+            }
         }
 
         function onRoleChange() {
@@ -437,6 +558,10 @@
                 renderRoleBadge();
                 renderStats();
                 renderTable();
+
+                if (activeTab === 'analytics') {
+                    renderAnalytics();
+                }
 
                 // Maintain or select first
                 if (selectedPrId) {
@@ -482,6 +607,123 @@
             const totalSum = requestsData.reduce((sum, r) => sum + (Number(r.TotalAmount) || 0), 0);
             document.getElementById('stat-amount').textContent = formatCurrency(totalSum, 'EUR');
             document.getElementById('list-count').textContent = `${requestsData.length} demande(s)`;
+        }
+
+        // Render Analytics View Charts & Stats
+        function renderAnalytics() {
+            renderAnalyticsStats();
+            renderAnalyticsCharts();
+        }
+
+        function renderAnalyticsStats() {
+            document.getElementById('analytics-stat-total').textContent = requestsData.length;
+            const totalSum = requestsData.reduce((sum, r) => sum + (Number(r.TotalAmount) || 0), 0);
+            document.getElementById('analytics-stat-amount').textContent = formatCurrency(totalSum, 'EUR');
+            const submittedCount = requestsData.filter(r => r.Status === 'SUBMITTED').length;
+            document.getElementById('analytics-stat-submitted').textContent = submittedCount;
+        }
+
+        function renderAnalyticsCharts() {
+            if (typeof Chart === 'undefined') return;
+
+            // 1. Donut Chart: Status distribution
+            const statusCounts = { NEW: 0, SUBMITTED: 0, APPROVED: 0, REJECTED: 0 };
+            requestsData.forEach(r => {
+                const st = (r.Status || 'NEW').toUpperCase();
+                if (statusCounts[st] !== undefined) statusCounts[st]++;
+                else statusCounts[st] = 1;
+            });
+
+            const ctxStatus = document.getElementById('chart-status')?.getContext('2d');
+            if (ctxStatus) {
+                if (statusChart) statusChart.destroy();
+                statusChart = new Chart(ctxStatus, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Nouveau (NEW)', 'En Attente (SUBMITTED)', 'Approuvé (APPROVED)', 'Rejeté (REJECTED)'],
+                        datasets: [{
+                            data: [statusCounts.NEW, statusCounts.SUBMITTED, statusCounts.APPROVED, statusCounts.REJECTED],
+                            backgroundColor: ['#0070f2', '#e76500', '#257a3e', '#cd3934']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            // 2. Bar Chart: Total amount by Category
+            const catTotals = {};
+            requestsData.forEach(r => {
+                const cat = r.Category || 'AUTRE';
+                catTotals[cat] = (catTotals[cat] || 0) + (Number(r.TotalAmount) || 0);
+            });
+
+            const sortedCats = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
+
+            const ctxCategory = document.getElementById('chart-category')?.getContext('2d');
+            if (ctxCategory) {
+                if (categoryChart) categoryChart.destroy();
+                categoryChart = new Chart(ctxCategory, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedCats,
+                        datasets: [{
+                            label: 'Montant Total (EUR)',
+                            data: sortedCats.map(c => catTotals[c]),
+                            backgroundColor: '#0070f2',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // 3. Horizontal Bar Chart: Top 5 PRs by TotalAmount
+            const sortedPrs = [...requestsData]
+                .sort((a, b) => (Number(b.TotalAmount) || 0) - (Number(a.TotalAmount) || 0))
+                .slice(0, 5);
+
+            const ctxTop5 = document.getElementById('chart-top5')?.getContext('2d');
+            if (ctxTop5) {
+                if (top5Chart) top5Chart.destroy();
+                top5Chart = new Chart(ctxTop5, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedPrs.map(r => `${r.PrNumber || 'PR'} (${r.Requester || ''})`),
+                        datasets: [{
+                            label: 'Montant (EUR)',
+                            data: sortedPrs.map(r => Number(r.TotalAmount) || 0),
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
         }
 
         // Render Fiori Table
