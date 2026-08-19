@@ -5,6 +5,13 @@ module.exports = cds.service.impl(async function () {
 
     const { PurchaseRequests, PurchaseRequestItems } = this.entities;
 
+    function getMockContext(req) {
+        const headers = req.headers || {};
+        const role = (headers['x-mock-role'] || 'manager').toLowerCase();
+        const user = headers['x-mock-user'] || 'manager';
+        return { role, user };
+    }
+
     async function recalcItem(item) {
         item.ItemAmount = (Number(item.Quantity) || 0) * (Number(item.Price) || 0);
     }
@@ -20,6 +27,30 @@ module.exports = cds.service.impl(async function () {
         }
         await tx.update(PurchaseRequests, prId).with({ TotalAmount: total });
     }
+
+    // READ Authorization: filter by Requester if role === 'employee'
+    this.before('READ', PurchaseRequests, async (req) => {
+        const { role, user } = getMockContext(req);
+        if (role === 'employee') {
+            req.query.where({ Requester: user });
+        }
+    });
+
+    // UPDATE / DELETE Authorization: employee can only modify own PRs in NEW status
+    this.before(['UPDATE', 'DELETE'], PurchaseRequests, async (req) => {
+        const { role, user } = getMockContext(req);
+        if (role === 'employee') {
+            const param = req.params && req.params[0];
+            const prId = typeof param === 'string' ? param : (param && param.ID);
+            if (prId) {
+                const db = cds.db.tx(req);
+                const pr = await db.read(PurchaseRequests, prId);
+                if (pr && (pr.Requester !== user || pr.Status !== 'NEW')) {
+                    return req.error(403, "Vous ne pouvez modifier que vos propres demandes en statut NEW");
+                }
+            }
+        }
+    });
 
     this.before(['CREATE', 'UPDATE'], PurchaseRequestItems, async (req) => {
         await recalcItem(req.data);
@@ -54,11 +85,16 @@ module.exports = cds.service.impl(async function () {
     // fait pas ce filtrage.
 
     this.on('submit', PurchaseRequests, async (req) => {
+        const { role, user } = getMockContext(req);
         const db = cds.db.tx(req);
         const param = req.params && req.params[0];
         const prId = typeof param === 'string' ? param : (param && param.ID);
         const pr = await db.read(PurchaseRequests, prId);
         if (!pr) return req.error(404, 'Purchase Request introuvable');
+
+        if (role !== 'employee' || pr.Requester !== user) {
+            return req.error(403, "Seul le demandeur peut soumettre sa propre demande");
+        }
         if (pr.Status !== 'NEW') {
             return req.error(400, `Impossible de soumettre : statut actuel "${pr.Status}" (attendu: NEW)`);
         }
@@ -67,6 +103,10 @@ module.exports = cds.service.impl(async function () {
     });
 
     this.on('approve', PurchaseRequests, async (req) => {
+        const { role } = getMockContext(req);
+        if (role !== 'manager') {
+            return req.error(403, "Seul un manager peut approuver ou rejeter une demande");
+        }
         const db = cds.db.tx(req);
         const param = req.params && req.params[0];
         const prId = typeof param === 'string' ? param : (param && param.ID);
@@ -80,6 +120,10 @@ module.exports = cds.service.impl(async function () {
     });
 
     this.on('reject', PurchaseRequests, async (req) => {
+        const { role } = getMockContext(req);
+        if (role !== 'manager') {
+            return req.error(403, "Seul un manager peut approuver ou rejeter une demande");
+        }
         const db = cds.db.tx(req);
         const param = req.params && req.params[0];
         const prId = typeof param === 'string' ? param : (param && param.ID);

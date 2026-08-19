@@ -105,7 +105,35 @@
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+        }
+
+        .role-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .role-selector-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .role-selector-dropdown {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+            background-color: white;
+            color: var(--text-main);
+            cursor: pointer;
+            outline: none;
         }
 
         .btn {
@@ -513,6 +541,16 @@
             </div>
         </div>
         <div class="nav-actions">
+            <!-- Role Selector -->
+            <div class="role-selector-container">
+                <span class="role-selector-label">👤 Rôle :</span>
+                <select id="role-select" class="role-selector-dropdown" onchange="onRoleChange()">
+                    <option value="jdupont|employee">Employé (jdupont)</option>
+                    <option value="mlefevre|employee">Employé (mlefevre)</option>
+                    <option value="zouguari|employee">Employé (zouguari)</option>
+                    <option value="manager|manager" selected>Manager</option>
+                </select>
+            </div>
             <button class="btn btn-outline" id="btn-refresh" onclick="loadRequests()">
                 🔄 Rafraîchir
             </button>
@@ -525,7 +563,7 @@
         <!-- Stats Overview -->
         <section class="stats-grid">
             <div class="stat-card">
-                <span class="stat-label">Total Demandes</span>
+                <span class="stat-label">Total Demandes Visibles</span>
                 <span class="stat-value" id="stat-total">0</span>
             </div>
             <div class="stat-card">
@@ -548,7 +586,10 @@
             <!-- Master Table Card -->
             <section class="card">
                 <div class="card-header">
-                    <h2 class="card-title">📋 Liste des Demandes d'Achat</h2>
+                    <h2 class="card-title">
+                        📋 Liste des Demandes d'Achat
+                        <span id="role-view-badge"></span>
+                    </h2>
                     <span id="list-count" style="font-size: 12px; color: var(--text-muted); font-weight: 500;">0 demande(s)</span>
                 </div>
                 <div class="table-responsive">
@@ -598,13 +639,34 @@
         let requestsData = [];
         let selectedPrId = null;
 
-        // Fetch all purchase requests with items
+        // Active role context
+        let currentUser = { name: 'manager', role: 'manager' };
+
+        function getMockHeaders() {
+            return {
+                'x-mock-user': currentUser.name,
+                'x-mock-role': currentUser.role
+            };
+        }
+
+        function onRoleChange() {
+            const select = document.getElementById('role-select');
+            const [name, role] = select.value.split('|');
+            currentUser = { name, role };
+            selectedPrId = null;
+            loadRequests();
+        }
+
+        // Fetch purchase requests with items using role headers
         async function loadRequests() {
             try {
-                const res = await fetch(`${API_BASE}/PurchaseRequests?$expand=Items`);
+                const res = await fetch(`${API_BASE}/PurchaseRequests?$expand=Items`, {
+                    headers: getMockHeaders()
+                });
                 if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
                 const data = await res.json();
                 requestsData = data.value || [];
+                renderRoleBadge();
                 renderStats();
                 renderTable();
 
@@ -623,13 +685,23 @@
                     renderEmptyDetail();
                 }
 
-                showToast('Données chargées avec succès', 'success');
+                showToast(`Données chargées (${currentUser.role === 'manager' ? 'Vue Manager' : 'Vue Employé: ' + currentUser.name})`, 'success');
             } catch (err) {
                 console.error(err);
                 showToast(`Impossible de charger les données: ${err.message}`, 'error');
                 document.getElementById('table-body').innerHTML = `
                     <tr><td colspan="8" class="empty-state" style="color: red;">Erreur: ${err.message}</td></tr>
                 `;
+            }
+        }
+
+        function renderRoleBadge() {
+            const container = document.getElementById('role-view-badge');
+            if (!container) return;
+            if (currentUser.role === 'manager') {
+                container.innerHTML = `<span class="badge badge-submitted" style="margin-left: 8px;">Vue Manager (toutes les demandes)</span>`;
+            } else {
+                container.innerHTML = `<span class="badge badge-new" style="margin-left: 8px;">Vue Employé (${currentUser.name})</span>`;
             }
         }
 
@@ -648,7 +720,7 @@
         function renderTable() {
             const tbody = document.getElementById('table-body');
             if (requestsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Aucune demande d'achat trouvée.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Aucune demande d'achat trouvée pour ce rôle.</td></tr>`;
                 return;
             }
 
@@ -674,12 +746,38 @@
             if (pr) renderDetail(pr);
         }
 
-        // Render Detail Panel
+        // Render Detail Panel with Role-based Button Visibility
         function renderDetail(pr) {
             const container = document.getElementById('detail-content');
 
             const isNew = pr.Status === 'NEW';
             const isSubmitted = pr.Status === 'SUBMITTED';
+
+            const isEmployee = currentUser.role === 'employee';
+            const isManager = currentUser.role === 'manager';
+            const isOwnPr = pr.Requester === currentUser.name;
+
+            const showSubmit = isEmployee && isOwnPr && isNew;
+            const showApprove = isManager && isSubmitted;
+            const showReject = isManager && isSubmitted;
+
+            const submitBtnHtml = showSubmit ? `
+                <button class="btn btn-primary" onclick="executeAction('${pr.ID}', 'submit')">
+                    📤 Soumettre (Submit)
+                </button>
+            ` : '';
+
+            const approveBtnHtml = showApprove ? `
+                <button class="btn btn-success" onclick="executeAction('${pr.ID}', 'approve')">
+                    ✅ Approuver (Approve)
+                </button>
+            ` : '';
+
+            const rejectBtnHtml = showReject ? `
+                <button class="btn btn-danger" onclick="executeAction('${pr.ID}', 'reject')">
+                    ❌ Rejeter (Reject)
+                </button>
+            ` : '';
 
             const itemsHtml = (pr.Items && pr.Items.length > 0) ? `
                 <div class="table-responsive">
@@ -728,15 +826,9 @@
                         <button class="btn btn-ai" id="btn-ai-analyze" onclick="runAIAnalysis('${pr.ID}')">
                             🤖 AI Analysis
                         </button>
-                        <button class="btn btn-primary" ${!isNew ? 'disabled' : ''} onclick="executeAction('${pr.ID}', 'submit')">
-                            📤 Soumettre (Submit)
-                        </button>
-                        <button class="btn btn-success" ${!isSubmitted ? 'disabled' : ''} onclick="executeAction('${pr.ID}', 'approve')">
-                            ✅ Approuver (Approve)
-                        </button>
-                        <button class="btn btn-danger" ${!isSubmitted ? 'disabled' : ''} onclick="executeAction('${pr.ID}', 'reject')">
-                            ❌ Rejeter (Reject)
-                        </button>
+                        ${submitBtnHtml}
+                        ${approveBtnHtml}
+                        ${rejectBtnHtml}
                     </div>
                 </div>
 
@@ -784,7 +876,7 @@
             `;
         }
 
-        // Action Execution (submit, approve, reject)
+        // Action Execution (submit, approve, reject) with role headers
         async function executeAction(id, actionName) {
             let body = {};
             if (actionName === 'reject') {
@@ -800,7 +892,10 @@
                 const url = `${API_BASE}/PurchaseRequests(${id})/PurchaseRequestService.${actionName}`;
                 const res = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getMockHeaders()
+                    },
                     body: JSON.stringify(body)
                 });
 
@@ -818,7 +913,7 @@
             }
         }
 
-        // AI Analysis Call
+        // AI Analysis Call with role headers
         async function runAIAnalysis(id) {
             const btn = document.getElementById('btn-ai-analyze');
             const aiContainer = document.getElementById('ai-result-container');
@@ -840,7 +935,10 @@
                 const url = `${API_BASE}/PurchaseRequests(${id})/PurchaseRequestService.analyzeWithAI`;
                 const res = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getMockHeaders()
+                    },
                     body: JSON.stringify({})
                 });
 
