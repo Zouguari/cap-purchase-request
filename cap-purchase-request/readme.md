@@ -1,119 +1,627 @@
-# CAP Purchase Request Service — Workflow SAP Fiori + Copilot IA
+# CAP Purchase Request Service — SAP Fiori Workflow + AI Analysis
 
-Application Node.js basée sur le SAP Cloud Application Programming Model (CAP), conçue pour étendre un backend SAP RAP (RESTful ABAP Programming Model) existant avec un workflow d'approbation Fiori, une autorisation par instance (Employé/Manager), une vue analytique interactive et une couche d'analyse intelligente propulsée par l'IA (Groq / Llama 3.3 70B).
+Application Node.js basée sur le **SAP Cloud Application Programming Model (CAP)**, conçue comme une **extension side-by-side** d'un backend SAP RAP (RESTful ABAP Programming Model).
 
-Ce projet complète un backend RAP développé indépendamment ([voir le dépôt](https://github.com/Zouguari/Sap_purchase_request)), en démontrant comment SAP CAP peut être utilisé comme couche d'orchestration et d'intégration IA au-dessus d'un système SAP existant, sans dupliquer ni contourner sa logique métier.
+Le projet implémente un workflow de demandes d'achat avec :
 
----
+- Workflow d'approbation Fiori
+- Autorisation par instance (Employé / Manager)
+- Gestion Header / Items
+- Actions métier `submit`, `approve` et `reject`
+- Dashboard analytique interactif
+- Analyse intelligente par IA avec **Groq / Llama 3.3 70B**
+- API OData V4
+- Architecture préparée pour la consommation d'un service SAP RAP OData V4
 
-## 🏗️ Architecture
+Le backend SAP RAP a été développé indépendamment :
 
-```
-┌───────────────────────────┐      ┌─────────────────────────────┐
-│  CDS Model (db/schema.cds) │ ───► │  CAP Service (srv/service)  │
-└───────────────────────────┘      └──────────────┬──────────────┘
-                                                  │
-                                                  ├──► 🤖 Groq AI API (Llama 3.3 70B)
-                                                  │
-                                                  ▼
-┌───────────────────────────┐      ┌─────────────────────────────┐
-│  SAP Fiori UI5 + Chart.js │ ◄─── │       OData V4 Endpoint     │
-└───────────────────────────┘      └─────────────────────────────┘
-```
-
-> **Note d'architecture : pourquoi une simulation, et pas une connexion directe au RAP**  
-> Le service CAP a été conçu pour se brancher directement sur le vrai service OData V4 exposé par le backend RAP (`ZUI_PURCHASEREQUEST`) — le modèle CDS a d'ailleurs été généré à partir du `$metadata` réel de ce service (`cds import`), et une première tentative d'intégration a été menée avec succès jusqu'à l'authentification.  
-> Cette connexion nécessite cependant un accès SAP BTP Cockpit pour créer les identifiants OAuth machine-à-machine (*Communication Arrangement / Service Key*) — un accès non disponible dans le cadre d'un compte BTP Free Tier depuis mon pays de résidence.  
-> Plutôt que d'attendre cet accès, j'ai choisi de simuler fidèlement le service RAP dans CAP (mêmes entités, mêmes champs, mêmes actions `submit`/`approve`/`reject`, mêmes règles de transition de statut) afin de :
-> - comprendre en profondeur le fonctionnement de CAP (modèle CDS, services OData V4, actions liées, handlers Node.js) ;
-> - construire et démontrer l'intégralité de la couche d'orchestration et d'IA sans dépendance externe ;
-> - garder une architecture prête à être reconnectée au vrai RAP en ne changeant que la configuration de connexion, sans réécrire le service.
+**SAP RAP repository:**  
+[https://github.com/Zouguari/Sap_purchase_request](https://github.com/Zouguari/Sap_purchase_request)
 
 ---
 
-## 📸 Aperçu
+# 🏗️ Architecture
 
-### 1. Vue Manager — Liste globale des demandes d'achat
-Vue globale des demandes d'achat pour le rôle Manager, avec cartes KPI, ShellBar SAP Fiori et filtres d'affichage.
+## Target Architecture
+
+L'architecture cible du projet est basée sur une approche **SAP RAP + SAP CAP Side-by-Side Extension**.
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│                       SAP RAP                           │
+│                Purchase Request Backend                 │
+│                                                         │
+│  • Business Logic                                       │
+│  • Validations                                          │
+│  • Authorization                                        │
+│  • Draft Management                                     │
+│  • Transaction Management                               │
+│  • submit / approve / reject                            │
+└────────────────────────────┬────────────────────────────┘
+                             │
+                         OData V4
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────┐
+│                    SAP CAP — Node.js                    │
+│                 Side-by-Side Extension                  │
+│                                                         │
+│  • Remote Service Integration                           │
+│  • Service Orchestration                                │
+│  • AI Analysis                                          │
+│  • Analytics                                            │
+└────────────────────────────┬────────────────────────────┘
+                             │
+                         OData V4
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────┐
+│                    SAP Fiori / UI5                      │
+│                    Dashboard                            │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Current Development Architecture
+
+Le backend SAP RAP a été développé séparément et expose un service OData V4 :
+
+`ZUI_PURCHASEREQUEST`
+
+Le modèle du service RAP a été importé dans le projet CAP à partir du véritable `$metadata` du service OData V4.
+
+Les fichiers correspondants sont présents dans :
+
+```text
+srv/external/
+├── ZUI_PURCHASEREQUEST.csn
+└── ZUI_PURCHASEREQUEST.edmx
+```
+
+Cependant, l'environnement SAP Practice utilisé pour le développement nécessite une authentification interactive IAS/OAuth et ne fournit actuellement pas les credentials Machine-to-Machine nécessaires pour qu'une application CAP locale consomme directement le service RAP.
+
+La connectivité réseau vers le endpoint RAP a néanmoins été vérifiée.
+
+Pour cette raison, la version publique actuelle utilise une implémentation locale SQLite alignée sur le contrat et le workflow du backend RAP.
+
+```text
+┌──────────────────────────────┐
+│     RAP-aligned SQLite       │
+│       Local Backend          │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────┐
+│             SAP CAP — Node.js                │
+│                                              │
+│  • OData V4                                  │
+│  • Workflow                                  │
+│  • Authorization                             │
+│  • AI / Groq                                 │
+│  • Analytics                                 │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────┐
+│             SAP Fiori / UI5                  │
+│               Dashboard                      │
+└──────────────────────────────────────────────┘
+```
+
+### Why a local simulation?
+
+The CAP service was designed to consume the real OData V4 service exposed by the SAP RAP backend (`ZUI_PURCHASEREQUEST`).
+
+The RAP service metadata was imported from the actual `$metadata` document and is already available in `srv/external/`.
+
+A real CAP → RAP integration was tested up to the authentication layer. Network connectivity to the RAP endpoint was confirmed, but the practice environment requires interactive IAS/OAuth authentication and does not currently provide the machine-to-machine credentials required by the local CAP application.
+
+Rather than bypassing the security model or using browser sessions/cookies, the project currently uses a local RAP-aligned implementation for development and demonstration.
+
+The target architecture remains:
+
+**SAP RAP → OData V4 → SAP CAP → AI / Analytics → SAP Fiori**
+
+Once a suitable machine-to-machine authentication mechanism is available, the CAP data-access layer can be switched to the real RAP Remote Service with minimal changes.
+
+---
+
+# 📸 Application Overview
+
+### 1. Manager View — Purchase Request List
+
+Vue globale des demandes d'achat pour le rôle Manager, avec :
+- Liste des demandes
+- KPI
+- Filtres
+- SAP Fiori ShellBar
+- Accès aux détails
+
 ![Vue Manager - Liste globale](screenshots/01-list-purchase-requests.png)
 
-### 2. Vue Employé — Consultation d'une demande
-Vue restreinte pour un Employé, ne visualisant que sa propre demande. Les boutons d'approbation/rejet sont masqués.
+### 2. Employee View — Purchase Request Details
+
+Un employé peut consulter ses propres demandes d'achat.
+
+Les demandes des autres employés ne sont pas accessibles.
+
 ![Vue Employé - Consultation](screenshots/02-detail-with-items.png)
 
-### 3. Vue Employé — Soumission d'une demande
-Soumission d'une demande NEW par son demandeur, déclenchant la transition vers SUBMITTED avec notification.
+### 3. Employee View — Submit Purchase Request
+
+Un employé peut soumettre une demande avec le statut :
+
+`NEW` → `SUBMITTED`
+
+Une notification est générée après la soumission.
+
 ![Vue Employé - Soumission](screenshots/03-submit-action.png)
 
-### 4. Vue Manager — Approbation / Rejet
-Validation d'une demande soumise par le Manager, avec confirmation de l'action.
+### 4. Manager View — Approve / Reject
+
+Le Manager peut traiter les demandes soumises :
+
+`SUBMITTED` → `APPROVED`
+
+ou :
+
+`SUBMITTED` → `REJECTED`
+
+Lors d'un rejet, un motif est obligatoire.
+
 ![Vue Manager - Approbation / Rejet](screenshots/04-approve-reject-workflow.png)
 
-### 5. Analyse intelligente par IA
-Rapport d'analyse généré à la volée (Groq / Llama 3.3 70B), intégré dans le panneau Fiori : suggestion de catégorie, niveau de risque, détection d'anomalie et recommandation.
+### 5. AI-Powered Purchase Request Analysis
+
+Le projet intègre une couche d'analyse intelligente utilisant :
+
+```text
+Groq API
+   ↓
+Llama 3.3 70B
+```
+
+L'analyse retourne notamment :
+- Catégorie suggérée
+- Niveau de risque
+- Résumé
+- Détection d'anomalie
+- Justification
+- Recommandation
+
 ![Analyse intelligente par IA](screenshots/05-ai-analysis-fiori.png)
 
-### 6. Vue analytique interactive
-Onglet Analytics présentant 3 graphiques (répartition par statut, montants par catégorie, top 5 des demandes), calculés en temps réel selon le rôle actif.
+### 6. Interactive Analytics
+
+Le dashboard contient plusieurs visualisations :
+- Répartition des demandes par statut
+- Montants par catégorie
+- Top 5 des demandes
+
+Les données sont recalculées dynamiquement en fonction des données accessibles au rôle courant.
+
 ![Vue analytique interactive](screenshots/06-analytics-view.png)
 
 ---
 
-## ⚙️ Fonctionnalités
+# ⚙️ Fonctionnalités
 
-### Workflow métier
-- Modèle header/items avec composition (`PurchaseRequests` → `PurchaseRequestItems`)
-- Calcul automatique de `ItemAmount` et `TotalAmount`
-- Machine à états : `NEW` → `SUBMITTED` → `APPROVED` ou `REJECTED` (motif obligatoire), avec rejet explicite de toute transition invalide
+## Purchase Request Workflow
 
-### Autorisation par instance (Employé/Manager)
-- Un employé ne voit et ne peut soumettre que ses propres demandes, uniquement en statut `NEW`
-- Seul un manager peut approuver ou rejeter
-- Règles appliquées côté serveur (pas seulement masquées dans l'interface), reproduisant la logique `get_instance_authorizations` du backend RAP d'origine
+Le modèle utilise une structure Header / Items :
 
-### Analyse IA (Groq / Llama 3.3 70B)
-- Action OData V4 liée `analyzeWithAI()`, exécutée à la demande, en lecture seule (aucune écriture en base)
-- Retourne : catégorie suggérée, niveau de risque, résumé, détection d'anomalie avec justification, recommandation
-- Validé sur cas réels : détection confirmée d'une anomalie de prix (ex. un article à 50 000 € correctement signalé comme suspect), et classification correcte d'une demande normale
+```text
+PurchaseRequest
+      │
+      └── PurchaseRequestItems
+```
 
-### Vue analytique
-- Répartition par statut, montants par catégorie, top 5 des demandes — recalculés dynamiquement selon le rôle et les données à jour
+Fonctionnalités :
+- Création de demandes d'achat
+- Gestion des items
+- Calcul automatique de `ItemAmount`
+- Calcul automatique de `TotalAmount`
+- Workflow basé sur une machine à états
+
+Transitions :
+
+```text
+NEW
+ │
+ │ submit
+ ▼
+SUBMITTED
+ │
+ ├── approve ──► APPROVED
+ │
+ └── reject ───► REJECTED
+```
+
+Les transitions invalides sont rejetées côté serveur.
+
+## 🔐 Instance-Based Authorization
+
+Le service applique des règles d'autorisation côté serveur.
+
+### Employee
+
+Un employé :
+- ne peut consulter que ses propres demandes ;
+- peut créer une demande ;
+- peut soumettre uniquement ses demandes `NEW` ;
+- ne peut pas approuver ou rejeter une demande.
+
+### Manager
+
+Un manager :
+- peut consulter les demandes accessibles ;
+- peut approuver une demande `SUBMITTED` ;
+- peut rejeter une demande `SUBMITTED` ;
+- doit fournir un motif lors d'un rejet.
+
+Ces règles sont implémentées côté serveur et ne reposent pas uniquement sur le masquage des boutons dans l'interface.
+
+Le comportement meublé est conçu pour être cohérent avec les règles métier du backend RAP d'origine.
+
+## 🤖 AI Analysis — Groq / Llama 3.3 70B
+
+Le service expose une action OData V4 :
+
+`analyzeWithAI()`
+
+Cette action est exécutée à la demande et fonctionne en lecture seule.
+
+Elle analyse les informations d'une demande d'achat et retourne :
+
+```json
+{
+  "category": "...",
+  "riskLevel": "...",
+  "summary": "...",
+  "anomaly": "...",
+  "recommendation": "..."
+}
+```
+
+### Exemple de détection
+
+Une demande contenant un article avec un prix inhabituellement élevé peut être signalée comme anomalie.
+
+Exemple :
+- **Product:** Enterprise Server
+- **Price:** 50,000 EUR
+
+Le modèle peut identifier cette valeur comme potentiellement anormale et fournir une justification.
+
+L'IA est utilisée comme couche d'enrichissement et ne remplace pas les règles métier transactionnelles.
+
+## 📊 Analytics
+
+Le dashboard fournit plusieurs indicateurs :
+
+- **Requests by Status:** `NEW`, `SUBMITTED`, `APPROVED`, `REJECTED`
+- **Amounts by Category:** Agrégation des montants des demandes par catégorie.
+- **Top 5 Purchase Requests:** Classement des demandes selon leur montant.
+
+Les agrégations sont calculées dynamiquement à partir des données disponibles.
 
 ---
 
-## 🛠️ Stack technique
+# 🔌 RAP Integration
 
-| Composant | Technologie |
+Le projet est préparé pour consommer le service RAP :
+
+`ZUI_PURCHASEREQUEST`
+
+via OData V4.
+
+### Service cible :
+
+`/sap/opu/odata4/sap/zui_purchaserequest_o4/srvd/sap/zui_purchaserequest/0001/`
+
+Le modèle importé contient notamment :
+- `PurchaseRequest`
+- `PurchaseRequestItem`
+- `I_DraftAdministrativeData`
+
+**PurchaseRequest** — Les principales clés du service RAP sont :
+- `PrId`
+- `IsActiveEntity`
+
+**PurchaseRequestItem** — Les principales clés sont :
+- `ItemId`
+- `IsActiveEntity`
+
+### RAP Actions
+
+Les actions métier exposées par le service RAP sont :
+- `submit()`
+- `approve()`
+- `reject(REJECT_REASON)`
+
+Le mapping prévu côté CAP est notamment :
+
+```text
+CAP frontend
+    │
+    │ reason
+    ▼
+CAP handler
+    │
+    │ REJECT_REASON
+    ▼
+RAP reject()
+```
+
+Les règles métier finales restent dans RAP lorsque le Remote Service réel est utilisé.
+
+---
+
+# 🧩 CAP Side-by-Side Extension
+
+Le rôle de CAP dans l'architecture cible n'est pas de remplacer RAP.
+
+La séparation des responsabilités est :
+
+| Layer | Responsibility |
 | :--- | :--- |
-| **Backend** | SAP CAP (Cloud Application Programming Model) / Node.js |
-| **Protocole de service** | OData V4, actions personnalisées (`submit`, `approve`, `reject`, `analyzeWithAI`) |
-| **Base de données** | SQLite (in-memory, seed automatique via CSV) |
-| **Design system UI** | SAP Fiori Horizon Theme, `@ui5/webcomponents` v2 |
-| **Graphiques** | Chart.js v4 |
-| **IA** | Groq API — `llama-3.3-70b-versatile` |
+| **SAP RAP** | Transactional business logic |
+| **SAP RAP** | Validations |
+| **SAP RAP** | Authorization |
+| **SAP RAP** | Draft management |
+| **SAP RAP** | Purchase Request persistence |
+| **SAP CAP** | Side-by-side extension |
+| **SAP CAP** | Orchestration |
+| **SAP CAP** | AI analysis |
+| **SAP CAP** | Analytics |
+| **SAP Fiori/UI5** | User interface |
+
+L'objectif est donc d'éviter de dupliquer les règles métier du backend RAP dans CAP.
 
 ---
 
-## 🚀 Lancer le projet
+# 🛠️ Tech Stack
 
+| Component | Technology |
+| :--- | :--- |
+| **Backend** | SAP CAP / Node.js |
+| **Enterprise Backend Target** | SAP RAP / ABAP Cloud |
+| **Service Protocol** | OData V4 |
+| **Frontend** | SAP Fiori / UI5 Web Components |
+| **UI Theme** | SAP Fiori Horizon |
+| **Charts** | Chart.js v4 |
+| **Local Database** | SQLite |
+| **AI Provider** | Groq API |
+| **AI Model** | Llama 3.3 70B |
+| **API Architecture** | OData V4 |
+| **Target Integration** | SAP RAP Remote Service |
+
+---
+
+# 📁 Project Structure
+
+```text
+cap-purchase-request/
+│
+├── app/
+│   └── dashboard/
+│       ├── index.html
+│       └── ...
+│
+├── db/
+│   ├── schema.cds
+│   └── data/
+│       ├── ...
+│       └── ...
+│
+├── srv/
+│   ├── service.cds
+│   ├── service.js
+│   ├── ai-analysis.js
+│   │
+│   └── external/
+│       ├── ZUI_PURCHASEREQUEST.csn
+│       └── ZUI_PURCHASEREQUEST.edmx
+│
+├── package.json
+├── .gitignore
+├── .env
+└── README.md
+```
+
+> **Security Note:** `.env` and other files containing credentials must never be committed to Git.
+
+---
+
+# 🚀 Running the Project
+
+### 1. Install dependencies
 ```bash
-# 1. Installer les dépendances
 npm install
+```
 
-# 2. Configurer la clé API (créer un fichier .env à la racine)
-echo "GROQ_API_KEY=votre_cle_groq" > .env
+### 2. Configure Groq API
 
-# 3. Démarrer le serveur CAP
+Create a `.env` file at the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+
+*Do not commit this file. Make sure `.env` is included in `.gitignore`.*
+
+### 3. Start CAP
+```bash
 npx cds watch
 ```
 
-- **Dashboard :** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
-- **Endpoint OData V4 :** [http://localhost:4004/odata/v4/purchase-request](http://localhost:4004/odata/v4/purchase-request)
+## 🌐 Local Endpoints
+
+- **Dashboard:** [http://localhost:4004/dashboard/index.html](http://localhost:4004/dashboard/index.html)
+- **CAP OData V4 Service:** [http://localhost:4004/odata/v4/purchase-request](http://localhost:4004/odata/v4/purchase-request)
+- **OData Metadata:** [http://localhost:4004/odata/v4/purchase-request/$metadata](http://localhost:4004/odata/v4/purchase-request/$metadata)
 
 ---
 
-## 🔭 Limites connues & prochaines étapes
+# 🔄 Current vs Target Integration
 
-- Le niveau de risque IA n'est pas encore parfaitement calibré (une demande normale peut occasionnellement être classée Medium plutôt que Low) — piste d'amélioration : affiner le prompt système avec des seuils explicites.
-- Connexion au backend RAP réel : dès obtention d'un accès BTP Cockpit (*Communication Arrangement / Service Key OAuth*), il suffira de mettre à jour la configuration `cds.requires.ZUI_PURCHASEREQUEST` — le modèle CDS a déjà été généré à partir du `$metadata` réel du service et est prêt à l'emploi.
-- Tests automatisés à ajouter sur le workflow de transitions de statut.
+### Current Development Mode
+```text
+SQLite
+  │
+  ▼
+SAP CAP
+  │
+  ├── Workflow
+  ├── Authorization
+  ├── AI
+  └── Analytics
+  │
+  ▼
+Fiori/UI5
+```
+
+SQLite is currently used as a local development backend.
+
+### Target Production Architecture
+```text
+SAP RAP
+  │
+  │ OData V4
+  ▼
+SAP CAP
+  │
+  ├── AI
+  ├── Analytics
+  └── Orchestration
+  │
+  ▼
+Fiori/UI5
+```
+
+The target architecture is designed so that RAP remains the transactional system of record while CAP provides side-by-side capabilities.
+
+---
+
+# 🔐 Authentication Considerations
+
+The real RAP endpoint is protected by SAP's authentication infrastructure.
+
+The local development environment currently does not have the required machine-to-machine credentials to access the RAP OData service directly.
+
+The project therefore does not use:
+- browser cookies;
+- interactive login automation;
+- personal browser sessions;
+- authentication bypasses;
+- hardcoded credentials.
+
+When a suitable authentication mechanism is available, the expected integration can use a secure mechanism such as:
+- **Communication User**
+
+or:
+- **OAuth2 Client Credentials**
+
+with credentials managed outside the Git repository.
+
+---
+
+# 🔭 Limitations & Future Improvements
+
+### Current Limitations
+
+1. **RAP Remote Service:** The real RAP service is not currently consumed at runtime because the development environment does not provide the required machine-to-machine authentication credentials. The RAP OData metadata has nevertheless already been imported and integrated into the project structure.
+2. **AI Risk Calibration:** The AI risk classification can occasionally produce `Medium` for a request that could reasonably be classified as `Low`. Possible improvement: stronger system prompts, explicit thresholds, structured output validation, domain-specific rules combined with LLM analysis.
+3. **Automated Tests:** Automated tests should be added for workflow transitions, authorization rules, `submit`, `approve`, `reject`, AI analysis, and analytics calculations.
+
+---
+
+# 🚧 Future Roadmap
+
+### Phase 1 — Current
+```text
+SAP CAP
+  │
+  ├── SQLite
+  ├── Fiori
+  ├── Workflow
+  ├── Authorization
+  ├── Analytics
+  └── AI
+```
+
+### Phase 2 — RAP Integration
+```text
+SAP RAP
+   │
+   │ OData V4
+   ▼
+SAP CAP Remote Service
+   │
+   ├── Orchestration
+   ├── AI
+   └── Analytics
+```
+
+### Phase 3 — Cloud Deployment
+
+Potential target architecture:
+
+```text
+SAP BTP
+│
+├── SAP CAP
+│
+├── Destination Service
+│
+├── Authentication
+│
+└── SAP RAP / ABAP Cloud
+```
+
+---
+
+# 🎯 Project Goals
+
+This project demonstrates how SAP technologies can be combined in a modern enterprise architecture:
+
+```text
+SAP RAP
+   │
+   │ OData V4
+   ▼
+SAP CAP
+   │
+   ├── Side-by-Side Extension
+   ├── AI
+   ├── Analytics
+   └── Orchestration
+   │
+   ▼
+SAP Fiori / UI5
+```
+
+The project focuses on understanding the separation of responsibilities between ABAP Cloud/RAP and CAP, while adding AI capabilities without embedding AI logic into the transactional backend.
+
+---
+
+# 👨‍💻 Author
+
+**Yassine Zouguari**  
+Engineering Student — Information Systems
+
+Main areas of interest:
+- SAP ABAP Cloud
+- SAP RAP
+- SAP CAP
+- SAP Fiori / UI5
+- Enterprise Application Development
+- AI-powered Enterprise Applications
+
+---
+
+# 📚 Related Project
+
+**SAP RAP — Purchase Request Backend**  
+[https://github.com/Zouguari/Sap_purchase_request](https://github.com/Zouguari/Sap_purchase_request)
+
+The RAP repository contains the transactional backend and business logic, while this repository focuses on the CAP side-by-side extension, Fiori experience, analytics and AI capabilities.

@@ -26,11 +26,10 @@
         }
       },
       "ZUI_PURCHASEREQUEST": {
-        "kind": "odata",
+        "kind": "odata-v4",
         "model": "srv/external/ZUI_PURCHASEREQUEST",
         "credentials": {
-          "url": "https://ce6e06b6-f3bd-4a11-9b57-63a09d5219ea.abap-web.eu10.hana.ondemand.com/sap/opu/odata4/sap/zui_purchaserequest_o4/srvd/sap/zui_purchaserequest/0001/",
-          "authentication": "BasicAuthentication"
+          "url": "https://ce6e06b6-f3bd-4a11-9b57-63a09d5219ea.abap-web.eu10.hana.ondemand.com/sap/opu/odata4/sap/zui_purchaserequest_o4/srvd/sap/zui_purchaserequest/0001/"
         }
       }
     }
